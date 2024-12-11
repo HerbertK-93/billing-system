@@ -1,11 +1,20 @@
-import 'package:billing/screens/loginscreen.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'loginscreen.dart';
 
-class SignupScreen extends StatelessWidget {
+class SignupScreen extends StatefulWidget {
+  @override
+  _SignupScreenState createState() => _SignupScreenState();
+}
+
+class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController firstNameController = TextEditingController();
   final TextEditingController lastNameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  bool isLoading = false;
+  bool isPasswordVisible = false;
 
   @override
   Widget build(BuildContext context) {
@@ -15,14 +24,11 @@ class SignupScreen extends StatelessWidget {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: 500, // Maximum width for web layout
-            ),
+            constraints: const BoxConstraints(maxWidth: 500),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Logo-like heading
                 const Text(
                   "INNOVATION CONSORTIUM BILLING",
                   textAlign: TextAlign.center,
@@ -34,10 +40,9 @@ class SignupScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 40),
 
-                // First Name and Last Name Side by Side
+                // First Name and Last Name
                 Row(
                   children: [
-                    // First Name Text Field
                     Expanded(
                       child: TextField(
                         controller: firstNameController,
@@ -47,8 +52,7 @@ class SignupScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16), // Spacer between the fields
-                    // Last Name Text Field
+                    const SizedBox(width: 16),
                     Expanded(
                       child: TextField(
                         controller: lastNameController,
@@ -62,7 +66,7 @@ class SignupScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // Email Text Field
+                // Email
                 TextField(
                   controller: emailController,
                   decoration: const InputDecoration(
@@ -73,39 +77,90 @@ class SignupScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // Password Text Field
+                // Password
                 TextField(
                   controller: passwordController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: "Password",
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          isPasswordVisible = !isPasswordVisible;
+                        });
+                      },
+                    ),
                   ),
-                  obscureText: true,
+                  obscureText: !isPasswordVisible,
                 ),
                 const SizedBox(height: 24),
 
                 // Sign Up Button
                 ElevatedButton(
-                  onPressed: () {
-                    // Simulate user signup logic here
-                    print("User signed up with email: ${emailController.text}");
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => LoginScreen()),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    primary: Colors.red, // Red color for signup button
-                  ),
-                  child: const Text(
-                    "Sign Up",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
+                  onPressed: isLoading
+                      ? null
+                      : () async {
+                          setState(() {
+                            isLoading = true;
+                          });
 
+                          try {
+                            // Create user in Firebase Auth
+                            UserCredential userCredential = await FirebaseAuth
+                                .instance
+                                .createUserWithEmailAndPassword(
+                              email: emailController.text.trim(),
+                              password: passwordController.text.trim(),
+                            );
+
+                            // Save user data to Firestore
+                            await FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(userCredential.user?.uid)
+                                .set({
+                              'firstName': firstNameController.text.trim(),
+                              'lastName': lastNameController.text.trim(),
+                              'email': emailController.text.trim(),
+                              'uid': userCredential.user?.uid,
+                            });
+
+                            // Navigate to Login Screen
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => LoginScreen()),
+                            );
+                          } catch (e) {
+                            // Display error message
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(e.toString())),
+                            );
+                          } finally {
+                            setState(() {
+                              isLoading = false;
+                            });
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.red,
+                    minimumSize:
+                        Size(150, 50), // Increase the size of the button
+                  ),
+                  child: isLoading
+                      ? CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                          "Sign Up",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                ),
                 const SizedBox(height: 16),
 
-                // Back to Login Text
+                // Already have an account? Log In
                 Center(
                   child: GestureDetector(
                     onTap: () {
@@ -117,7 +172,9 @@ class SignupScreen extends StatelessWidget {
                     child: RichText(
                       text: const TextSpan(
                         text: "Already have an account? ",
-                        style: TextStyle(color: Colors.black),
+                        style: TextStyle(
+                            color: Colors
+                                .black), // Black color for "Already have an account?"
                         children: [
                           TextSpan(
                             text: "Log In",

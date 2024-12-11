@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'forgotpasswordscreen.dart';
 import 'signupscreen.dart';
+import 'homescreen.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
+  @override
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  bool isLoading = false;
+  bool isPasswordVisible = false;
 
   @override
   Widget build(BuildContext context) {
-    // Get the screen size
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
@@ -49,11 +56,23 @@ class LoginScreen extends StatelessWidget {
                 // Password Text Field
                 TextField(
                   controller: passwordController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: "Password",
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          isPasswordVisible = !isPasswordVisible;
+                        });
+                      },
+                    ),
                   ),
-                  obscureText: true,
+                  obscureText: !isPasswordVisible,
                 ),
 
                 // Forgot Password
@@ -81,17 +100,50 @@ class LoginScreen extends StatelessWidget {
 
                 // Login Button
                 ElevatedButton(
-                  onPressed: () {
-                    // Implement login logic here
-                    print("Logging in with ${emailController.text}");
-                  },
+                  onPressed: isLoading
+                      ? null
+                      : () async {
+                          setState(() {
+                            isLoading = true;
+                          });
+
+                          try {
+                            // Log in the user with Firebase Authentication
+                            UserCredential userCredential = await FirebaseAuth
+                                .instance
+                                .signInWithEmailAndPassword(
+                              email: emailController.text.trim(),
+                              password: passwordController.text.trim(),
+                            );
+
+                            // Navigate to HomeScreen
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => HomeScreen()),
+                            );
+                          } catch (e) {
+                            // Show error message
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(e.toString())),
+                            );
+                          } finally {
+                            setState(() {
+                              isLoading = false;
+                            });
+                          }
+                        },
                   style: ElevatedButton.styleFrom(
-                    primary: Colors.red, // Red color for login button
+                    primary: Colors.red,
+                    minimumSize:
+                        Size(150, 50), // Increase the size of the button
                   ),
-                  child: const Text(
-                    "Log In",
-                    style: TextStyle(color: Colors.white),
-                  ),
+                  child: isLoading
+                      ? CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                          "Log In",
+                          style: TextStyle(color: Colors.white),
+                        ),
                 ),
 
                 const SizedBox(height: 16),
