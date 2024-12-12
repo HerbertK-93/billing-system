@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
-class HistoryScreen extends StatelessWidget {
+class ViewInvoicesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('History'),
-        backgroundColor: Colors.grey[300], // Light grey color
+        title: const Text('View Invoices'),
+        backgroundColor: Colors.grey[300],
       ),
       body: const Center(
         child: Text(
-          'History Screen',
+          'List of Invoices',
           style: TextStyle(fontSize: 24),
         ),
       ),
