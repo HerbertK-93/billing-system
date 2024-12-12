@@ -142,6 +142,10 @@ class SettingsScreen extends StatelessWidget {
             // Save Button
             Center(
               child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  primary: Color.fromARGB(
+                      255, 199, 184, 51), // Yellow background color
+                ),
                 onPressed: () {
                   // Save settings logic
                 },
