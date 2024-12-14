@@ -46,7 +46,7 @@ class SupplyScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  primary: Color.fromARGB(255, 199, 184, 51),
+                  primary: const Color.fromARGB(255, 199, 184, 51),
                   onPrimary: Colors.black,
                   padding:
                       const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -79,30 +79,39 @@ class SupplyScreen extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             shrinkWrap: true,
             children: [
-              buildTextField('Client Name', clientNameController),
-              buildTextField('Client Address', clientAddressController),
-              buildTextField('Client Email', clientEmailController),
-              buildTextField('Date', dateController),
-              buildTextField('Item Name', itemNameController),
-              buildTextField('Item Description', itemDescriptionController),
-              buildTextField('Item Quantity', itemQuantityController),
-              buildTextField('Item Market Price', itemMarketPriceController),
-              buildTextField('Other Expenses', otherExpensesController),
-              buildTextField(
-                  'Immediate Investment', immediateInvestmentController),
-              buildTextField('Days to Supply', daysToSupplyController),
-              buildTextField('Percentage Interest Charged',
-                  percentageInterestChargedController),
-              buildTextField('Rate', rateController),
-              buildTextField('Total Investment', totalInvestmentController),
-              buildTextField('Total Profit', totalProfitController),
+              Table(
+                columnWidths: const {
+                  0: FlexColumnWidth(2),
+                  1: FlexColumnWidth(3),
+                },
+                border: TableBorder.all(color: Colors.grey),
+                children: [
+                  buildTableRow('Client Name', clientNameController),
+                  buildTableRow('Client Address', clientAddressController),
+                  buildTableRow('Client Email', clientEmailController),
+                  buildTableRow('Date', dateController),
+                  buildTableRow('Item Name', itemNameController),
+                  buildTableRow('Item Description', itemDescriptionController),
+                  buildTableRow('Item Quantity', itemQuantityController),
+                  buildTableRow('Item Market Price', itemMarketPriceController),
+                  buildTableRow('Other Expenses', otherExpensesController),
+                  buildTableRow(
+                      'Immediate Investment', immediateInvestmentController),
+                  buildTableRow('Days to Supply', daysToSupplyController),
+                  buildTableRow('Percentage Interest Charged',
+                      percentageInterestChargedController),
+                  buildTableRow('Rate', rateController),
+                  buildTableRow('Total Investment', totalInvestmentController),
+                  buildTableRow('Total Profit', totalProfitController),
+                ],
+              ),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      primary: Color.fromARGB(255, 199, 184, 51),
+                      primary: const Color.fromARGB(255, 199, 184, 51),
                       onPrimary: Colors.black,
                       padding: const EdgeInsets.symmetric(
                           vertical: 12, horizontal: 24),
@@ -113,41 +122,52 @@ class SupplyScreen extends StatelessWidget {
                     onPressed: () async {
                       if (invoiceSessionId.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
+                          const SnackBar(
                               content:
                                   Text('Create a new invoice session first.')),
                         );
                         return;
                       }
 
-                      final invoiceData = {
+                      final List<Map<String, dynamic>> items = [
+                        {
+                          'name': itemNameController.text.trim(),
+                          'description': itemDescriptionController.text.trim(),
+                          'quantity': itemQuantityController.text.trim(),
+                          'price': itemMarketPriceController.text.trim(),
+                        },
+                      ];
+
+                      final Map<String, dynamic> invoiceData = {
                         'sessionId': invoiceSessionId,
-                        'clientName': clientNameController.text,
-                        'clientAddress': clientAddressController.text,
-                        'clientEmail': clientEmailController.text,
-                        'date': dateController.text,
-                        'itemName': itemNameController.text,
-                        'itemDescription': itemDescriptionController.text,
-                        'itemQuantity': itemQuantityController.text,
-                        'itemMarketPrice': itemMarketPriceController.text,
-                        'otherExpenses': otherExpensesController.text,
+                        'clientName': clientNameController.text.trim(),
+                        'clientAddress': clientAddressController.text.trim(),
+                        'clientEmail': clientEmailController.text.trim(),
+                        'date': dateController.text.trim(),
+                        'items': items,
+                        'otherExpenses': otherExpensesController.text.trim(),
                         'immediateInvestment':
-                            immediateInvestmentController.text,
-                        'daysToSupply': daysToSupplyController.text,
+                            immediateInvestmentController.text.trim(),
+                        'daysToSupply': daysToSupplyController.text.trim(),
                         'percentageInterestCharged':
-                            percentageInterestChargedController.text,
-                        'rate': rateController.text,
-                        'totalInvestment': totalInvestmentController.text,
-                        'totalProfit': totalProfitController.text,
+                            percentageInterestChargedController.text.trim(),
+                        'rate': rateController.text.trim(),
+                        'totalInvestment':
+                            totalInvestmentController.text.trim(),
+                        'totalProfit': totalProfitController.text.trim(),
                         'createdAt': FieldValue.serverTimestamp(),
                       };
 
+                      print('Saving Invoice: $invoiceData');
+
                       await FirebaseFirestore.instance
                           .collection('invoices')
-                          .add(invoiceData);
+                          .doc(invoiceSessionId)
+                          .set(invoiceData);
 
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Invoice Saved Successfully!')),
+                        const SnackBar(
+                            content: Text('Invoice Saved Successfully!')),
                       );
                     },
                     child: const Text(
@@ -157,8 +177,8 @@ class SupplyScreen extends StatelessWidget {
                   ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      primary: Colors.red, // Button background color
-                      onPrimary: Colors.white, // Text color
+                      primary: Colors.red,
+                      onPrimary: Colors.white,
                       padding: const EdgeInsets.symmetric(
                           vertical: 12, horizontal: 24),
                       shape: RoundedRectangleBorder(
@@ -166,7 +186,6 @@ class SupplyScreen extends StatelessWidget {
                       ),
                     ),
                     onPressed: () {
-                      // Clear all text fields
                       clientNameController.clear();
                       clientAddressController.clear();
                       clientEmailController.clear();
@@ -184,7 +203,7 @@ class SupplyScreen extends StatelessWidget {
                       totalProfitController.clear();
 
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Fields Cleared!')),
+                        const SnackBar(content: Text('Fields Cleared!')),
                       );
                     },
                     child: const Text(
@@ -201,18 +220,26 @@ class SupplyScreen extends StatelessWidget {
     );
   }
 
-  Widget buildTextField(String labelText, TextEditingController controller) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: labelText,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8.0),
+  TableRow buildTableRow(String label, TextEditingController controller) {
+    return TableRow(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child:
+              Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 }
