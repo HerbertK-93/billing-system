@@ -59,7 +59,7 @@ class DashboardScreen extends StatelessWidget {
                       child: Column(
                         children: [
                           Text(
-                            'Total Customers',
+                            'Total Clients',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -93,7 +93,7 @@ class DashboardScreen extends StatelessWidget {
                       child: Column(
                         children: [
                           Text(
-                            'Total Products',
+                            'Total Items',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,

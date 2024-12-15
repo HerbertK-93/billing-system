@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:html' as html;
-import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ViewInvoicesScreen extends StatelessWidget {
@@ -11,7 +10,6 @@ class ViewInvoicesScreen extends StatelessWidget {
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
-        // Create a blob for the file and trigger download
         final blob = html.Blob([response.bodyBytes]);
         final anchor = html.AnchorElement(
           href: html.Url.createObjectUrlFromBlob(blob),
@@ -108,14 +106,42 @@ class ViewInvoicesScreen extends StatelessWidget {
                           Text(
                               'Client Email: ${invoiceData['clientEmail'] ?? 'N/A'}'),
                           Text('Date: ${invoiceData['date'] ?? 'N/A'}'),
-                          Text(
-                              'Item Name: ${invoiceData['itemName'] ?? 'N/A'}'),
-                          Text(
-                              'Item Description: ${invoiceData['itemDescription'] ?? 'N/A'}'),
-                          Text(
-                              'Item Quantity: ${invoiceData['itemQuantity'] ?? 'N/A'}'),
-                          Text(
-                              'Item Market Price: ${invoiceData['itemMarketPrice'] ?? 'N/A'}'),
+                          const SizedBox(height: 10),
+                          const Text(
+                            'Items:',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          // Display items
+                          if (invoiceData['items'] != null &&
+                              invoiceData['items'] is List)
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: (invoiceData['items'] as List)
+                                  .map((item) => Text(
+                                        '- ${item['name'] ?? 'N/A'}: ${item['description'] ?? 'N/A'} (Qty: ${item['quantity'] ?? 0}, Price: ${item['price'] ?? 0})',
+                                      ))
+                                  .toList(),
+                            )
+                          else
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                    'Item Name: ${invoiceData['itemName'] ?? 'N/A'}'),
+                                Text(
+                                    'Item Description: ${invoiceData['itemDescription'] ?? 'N/A'}'),
+                                Text(
+                                    'Item Quantity: ${invoiceData['itemQuantity'] ?? 'N/A'}'),
+                                Text(
+                                    'Item Market Price: ${invoiceData['itemMarketPrice'] ?? 'N/A'}'),
+                              ],
+                            ),
+                          const SizedBox(height: 10),
                           Text(
                               'Other Expenses: ${invoiceData['otherExpenses'] ?? 'N/A'}'),
                           Text(
@@ -135,7 +161,7 @@ class ViewInvoicesScreen extends StatelessWidget {
                               await downloadInvoice(invoice.id);
                             },
                             style: ElevatedButton.styleFrom(
-                              primary: Colors.blue, // Button color
+                              primary: Colors.blue,
                             ),
                             child: const Text('Download Invoice'),
                           ),
