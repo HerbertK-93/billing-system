@@ -29,6 +29,7 @@ class _SignupScreenState extends State<SignupScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // App Title
                 const Text(
                   "INNOVATION CONSORTIUM BILLING",
                   textAlign: TextAlign.center,
@@ -40,7 +41,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 const SizedBox(height: 40),
 
-                // First Name and Last Name
+                // First Name and Last Name Fields
                 Row(
                   children: [
                     Expanded(
@@ -66,7 +67,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Email
+                // Email Field
                 TextField(
                   controller: emailController,
                   decoration: const InputDecoration(
@@ -77,7 +78,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Password
+                // Password Field
                 TextField(
                   controller: passwordController,
                   decoration: InputDecoration(
@@ -97,6 +98,19 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   ),
                   obscureText: !isPasswordVisible,
+                ),
+
+                // Password Requirement Message
+                const Padding(
+                  padding: EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    "Password must be more than 6 characters.",
+                    style: TextStyle(
+                      color: Color.fromARGB(255, 245, 3, 3),
+                      fontSize: 14,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 24),
 
@@ -149,10 +163,10 @@ class _SignupScreenState extends State<SignupScreen> {
                   style: ElevatedButton.styleFrom(
                     primary: Colors.red,
                     minimumSize:
-                        Size(150, 50), // Increase the size of the button
+                        const Size(150, 50), // Increase the size of the button
                   ),
                   child: isLoading
-                      ? CircularProgressIndicator(color: Colors.white)
+                      ? const CircularProgressIndicator(color: Colors.white)
                       : const Text(
                           "Sign Up",
                           style: TextStyle(color: Colors.white),
@@ -160,7 +174,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Already have an account? Log In
+                // Already have an account? Log In Link
                 Center(
                   child: GestureDetector(
                     onTap: () {
@@ -172,9 +186,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     child: RichText(
                       text: const TextSpan(
                         text: "Already have an account? ",
-                        style: TextStyle(
-                            color: Colors
-                                .black), // Black color for "Already have an account?"
+                        style: TextStyle(color: Colors.black),
                         children: [
                           TextSpan(
                             text: "Log In",

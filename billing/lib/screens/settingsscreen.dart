@@ -25,6 +25,7 @@ class SettingsScreen extends StatelessWidget {
                   title: const Text('Language'),
                   onTap: () {
                     // Navigate to language settings
+                    Navigator.pushNamed(context, '/languageSettings');
                   },
                 ),
                 ListTile(
@@ -32,6 +33,7 @@ class SettingsScreen extends StatelessWidget {
                   title: const Text('Theme'),
                   onTap: () {
                     // Navigate to theme settings
+                    Navigator.pushNamed(context, '/themeSettings');
                   },
                 ),
                 ListTile(
@@ -39,6 +41,7 @@ class SettingsScreen extends StatelessWidget {
                   title: const Text('Date/Time Format'),
                   onTap: () {
                     // Navigate to date/time settings
+                    Navigator.pushNamed(context, '/dateTimeSettings');
                   },
                 ),
               ],
@@ -53,14 +56,16 @@ class SettingsScreen extends StatelessWidget {
                   leading: const Icon(Icons.edit),
                   title: const Text('Edit Profile'),
                   onTap: () {
-                    // Navigate to edit profile
+                    // Navigate to edit profile screen
+                    Navigator.pushNamed(context, '/editProfile');
                   },
                 ),
                 ListTile(
                   leading: const Icon(Icons.lock),
                   title: const Text('Change Password'),
                   onTap: () {
-                    // Navigate to change password
+                    // Navigate to change password screen
+                    Navigator.pushNamed(context, '/changePassword');
                   },
                 ),
               ],
@@ -75,7 +80,8 @@ class SettingsScreen extends StatelessWidget {
                   leading: const Icon(Icons.insert_drive_file),
                   title: const Text('Invoice Template'),
                   onTap: () {
-                    // Navigate to invoice template
+                    // Navigate to invoice template settings
+                    Navigator.pushNamed(context, '/invoiceTemplate');
                   },
                 ),
                 ListTile(
@@ -83,13 +89,15 @@ class SettingsScreen extends StatelessWidget {
                   title: const Text('Tax Settings'),
                   onTap: () {
                     // Navigate to tax settings
+                    Navigator.pushNamed(context, '/taxSettings');
                   },
                 ),
                 ListTile(
                   leading: const Icon(Icons.payment),
                   title: const Text('Payment Gateways'),
                   onTap: () {
-                    // Navigate to payment gateways
+                    // Navigate to payment gateways settings
+                    Navigator.pushNamed(context, '/paymentGateways');
                   },
                 ),
               ],
@@ -104,14 +112,16 @@ class SettingsScreen extends StatelessWidget {
                   leading: const Icon(Icons.email),
                   title: const Text('Email Notifications'),
                   onTap: () {
-                    // Navigate to email notifications
+                    // Navigate to email notifications settings
+                    Navigator.pushNamed(context, '/emailNotifications');
                   },
                 ),
                 ListTile(
                   leading: const Icon(Icons.sms),
                   title: const Text('SMS Notifications'),
                   onTap: () {
-                    // Navigate to SMS notifications
+                    // Navigate to SMS notifications settings
+                    Navigator.pushNamed(context, '/smsNotifications');
                   },
                 ),
               ],
@@ -126,14 +136,16 @@ class SettingsScreen extends StatelessWidget {
                   leading: const Icon(Icons.download),
                   title: const Text('Export Data'),
                   onTap: () {
-                    // Navigate to export data
+                    // Navigate to export data functionality
+                    Navigator.pushNamed(context, '/exportData');
                   },
                 ),
                 ListTile(
                   leading: const Icon(Icons.restore),
                   title: const Text('Backup & Restore'),
                   onTap: () {
-                    // Navigate to backup & restore
+                    // Navigate to backup & restore functionality
+                    Navigator.pushNamed(context, '/backupRestore');
                   },
                 ),
               ],
@@ -143,11 +155,15 @@ class SettingsScreen extends StatelessWidget {
             Center(
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  primary: Color.fromARGB(
+                  primary: const Color.fromARGB(
                       255, 199, 184, 51), // Yellow background color
                 ),
                 onPressed: () {
-                  // Save settings logic
+                  // Implement save settings functionality
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Settings saved successfully!')),
+                  );
                 },
                 child: const Text('Save Changes'),
               ),

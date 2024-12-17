@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
 class InstallationScreen extends StatelessWidget {
+  // Controllers and invoiceSessionId remain unchanged
   final TextEditingController clientNameController = TextEditingController();
   final TextEditingController clientAddressController = TextEditingController();
   final TextEditingController clientEmailController = TextEditingController();
@@ -36,7 +37,7 @@ class InstallationScreen extends StatelessWidget {
           },
         ),
         title: const Text(
-          'Installation',
+          'Installtion',
           style: TextStyle(color: Colors.black),
         ),
         backgroundColor: Colors.grey[300],
@@ -158,12 +159,19 @@ class InstallationScreen extends StatelessWidget {
                         'createdAt': FieldValue.serverTimestamp(),
                       };
 
-                      print('Saving Invoice: $invoiceData');
-
                       await FirebaseFirestore.instance
                           .collection('invoices')
                           .doc(invoiceSessionId)
                           .set(invoiceData);
+
+                      // Save recent activity in Firestore
+                      await FirebaseFirestore.instance
+                          .collection('recentActivities')
+                          .add({
+                        'invoiceId': invoiceSessionId,
+                        'clientName': clientNameController.text.trim(),
+                        'timestamp': FieldValue.serverTimestamp(),
+                      });
 
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(

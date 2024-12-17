@@ -1,11 +1,12 @@
-import 'package:billing/screens/categoriesscreen.dart';
-import 'package:billing/screens/dashboardscreen.dart';
-import 'package:billing/screens/invoicesscreen.dart';
-import 'package:billing/screens/reportsscreen.dart';
-import 'package:billing/screens/settingsscreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'categoriesscreen.dart';
+import 'dashboardscreen.dart';
+import 'invoicesscreen.dart';
+import 'reportsscreen.dart';
+import 'settingsscreen.dart';
+import 'loginscreen.dart'; // Ensure this is imported
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -18,7 +19,6 @@ class _HomeScreenState extends State<HomeScreen> {
   bool isLoading = true;
   int selectedIndex = 0;
   final PageController _pageController = PageController();
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final TextEditingController searchController = TextEditingController();
 
   @override
@@ -72,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
             title,
             style: const TextStyle(
               fontWeight: FontWeight.w600,
-              color: Colors.black, // Black color for all text
+              color: Colors.black,
             ),
           ),
         ),
@@ -83,7 +83,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
       appBar: AppBar(
         backgroundColor: Colors.blueAccent,
         title: Row(
@@ -124,7 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: Colors.blueAccent,
               ),
               child: CircleAvatar(
-                radius: 16, // Further reduced radius size
+                radius: 16,
                 backgroundColor: Colors.white,
                 child: Text(
                   getUserInitials(),
@@ -147,9 +146,21 @@ class _HomeScreenState extends State<HomeScreen> {
               leading: const Icon(Icons.logout),
               title: const Text('Logout'),
               onTap: () async {
-                await FirebaseAuth.instance.signOut();
-                Navigator.popUntil(context, (route) => route.isFirst);
-                Navigator.pushReplacementNamed(context, '/login');
+                try {
+                  // Sign out the user
+                  await FirebaseAuth.instance.signOut();
+
+                  // Navigate to the login screen
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => LoginScreen()),
+                    );
+                  });
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Logout failed: ${e.toString()}')),
+                  );
+                }
               },
             ),
           ],
@@ -162,7 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: TextField(
               controller: searchController,
               decoration: InputDecoration(
-                hintText: 'Search by Customer Name, Invoice Number, or Product',
+                hintText: 'Search by Client Name, Invoice ID, or Item',
                 prefixIcon: const Icon(Icons.search, color: Colors.blueAccent),
                 filled: true,
                 fillColor: Colors.grey[200],
@@ -172,9 +183,63 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 contentPadding: const EdgeInsets.symmetric(vertical: 10.0),
               ),
-              onSubmitted: (query) {
-                // Logic for searching items based on the query
-                print('Search query: $query');
+              onSubmitted: (query) async {
+                if (query.trim().isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Please enter a search term.')),
+                  );
+                  return;
+                }
+
+                try {
+                  // Firestore query to search for the input in users, invoices, or items collections
+                  final userResults = await FirebaseFirestore.instance
+                      .collection('users')
+                      .where('name', isGreaterThanOrEqualTo: query)
+                      .where('name', isLessThanOrEqualTo: query + '\uf8ff')
+                      .get();
+
+                  final invoiceResults = await FirebaseFirestore.instance
+                      .collection('invoices')
+                      .where('invoiceId', isEqualTo: query)
+                      .get();
+
+                  final itemResults = await FirebaseFirestore.instance
+                      .collection('items')
+                      .where('itemName', isGreaterThanOrEqualTo: query)
+                      .where('itemName', isLessThanOrEqualTo: query + '\uf8ff')
+                      .get();
+
+                  // Aggregate and process results
+                  List<String> results = [];
+                  for (var doc in userResults.docs) {
+                    results.add('User: ${doc['name']}');
+                  }
+                  for (var doc in invoiceResults.docs) {
+                    results.add('Invoice ID: ${doc['invoiceId']}');
+                  }
+                  for (var doc in itemResults.docs) {
+                    results.add('Item: ${doc['itemName']}');
+                  }
+
+                  // Display results or show no matches found
+                  if (results.isNotEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text('Results:\n${results.join('\n')}')),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('No matches found.')),
+                    );
+                  }
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content: Text('Error during search: ${e.toString()}')),
+                  );
+                }
               },
             ),
           ),
@@ -182,7 +247,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Row(
               children: [
                 Container(
-                  width: 250, // Increased width for the sidebar
+                  width: 250,
                   color: const Color.fromARGB(255, 231, 230, 230),
                   padding: const EdgeInsets.all(10),
                   child: Column(
