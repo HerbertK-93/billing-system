@@ -13,8 +13,20 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController lastNameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
+
   bool isLoading = false;
   bool isPasswordVisible = false;
+  bool isConfirmPasswordVisible = false;
+
+  // Function to validate password
+  bool isPasswordValid(String password) {
+    final hasMinLength = password.length >= 6;
+    final hasNumber = password.contains(RegExp(r'\d'));
+    final hasSymbol = password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+    return hasMinLength && hasNumber && hasSymbol;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -100,11 +112,34 @@ class _SignupScreenState extends State<SignupScreen> {
                   obscureText: !isPasswordVisible,
                 ),
 
+                // Confirm Password Field
+                const SizedBox(height: 16),
+                TextField(
+                  controller: confirmPasswordController,
+                  decoration: InputDecoration(
+                    labelText: "Confirm Password",
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        isConfirmPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          isConfirmPasswordVisible = !isConfirmPasswordVisible;
+                        });
+                      },
+                    ),
+                  ),
+                  obscureText: !isConfirmPasswordVisible,
+                ),
+
                 // Password Requirement Message
                 const Padding(
                   padding: EdgeInsets.only(top: 8.0),
                   child: Text(
-                    "Password must be more than 6 characters.",
+                    "Password must have at least 6 characters, a number, and a symbol.",
                     style: TextStyle(
                       color: Color.fromARGB(255, 245, 3, 3),
                       fontSize: 14,
@@ -119,6 +154,31 @@ class _SignupScreenState extends State<SignupScreen> {
                   onPressed: isLoading
                       ? null
                       : () async {
+                          final password = passwordController.text.trim();
+                          final confirmPassword =
+                              confirmPasswordController.text.trim();
+
+                          if (!isPasswordValid(password)) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  "Password must have at least 6 characters, a number, and a symbol.",
+                                ),
+                              ),
+                            );
+                            return;
+                          }
+
+                          if (password != confirmPassword) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content:
+                                    Text("Passwords do not match. Try again."),
+                              ),
+                            );
+                            return;
+                          }
+
                           setState(() {
                             isLoading = true;
                           });
@@ -129,7 +189,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                 .instance
                                 .createUserWithEmailAndPassword(
                               email: emailController.text.trim(),
-                              password: passwordController.text.trim(),
+                              password: password,
                             );
 
                             // Save user data to Firestore
