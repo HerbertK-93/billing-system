@@ -101,12 +101,15 @@ class ViewInvoicesScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          // Display Client Information
                           Text(
                               'Client Address: ${invoiceData['clientAddress'] ?? 'N/A'}'),
                           Text(
                               'Client Email: ${invoiceData['clientEmail'] ?? 'N/A'}'),
                           Text('Date: ${invoiceData['date'] ?? 'N/A'}'),
                           const SizedBox(height: 10),
+
+                          // Display Items Section
                           const Text(
                             'Items:',
                             style: TextStyle(
@@ -116,52 +119,105 @@ class ViewInvoicesScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 10),
-                          // Display items
+
                           if (invoiceData['items'] != null &&
                               invoiceData['items'] is List)
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: (invoiceData['items'] as List)
-                                  .map((item) => Text(
-                                        '- ${item['name'] ?? 'N/A'}: ${item['description'] ?? 'N/A'} (Qty: ${item['quantity'] ?? 0}, Price: ${item['price'] ?? 0})',
-                                      ))
-                                  .toList(),
+                            Table(
+                              border: TableBorder.all(color: Colors.grey),
+                              columnWidths: const {
+                                0: FlexColumnWidth(2), // Name
+                                1: FlexColumnWidth(3), // Description
+                                2: FlexColumnWidth(1), // Quantity
+                                3: FlexColumnWidth(1), // Rate
+                                4: FlexColumnWidth(2), // Amount
+                              },
+                              children: [
+                                // Table Header
+                                const TableRow(children: [
+                                  Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Text('Name',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold)),
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Text('Description',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold)),
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Text('Quantity',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold)),
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Text('Rate (UGX)',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold)),
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Text('Amount (UGX)',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold)),
+                                  ),
+                                ]),
+                                // Table Rows
+                                ...List<TableRow>.from(
+                                  (invoiceData['items'] as List).map((item) {
+                                    return TableRow(children: [
+                                      Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text(
+                                              item['name'] ?? 'N/A')), // Name
+                                      Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text(item['description'] ??
+                                              'N/A')), // Description
+                                      Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text(
+                                              '${item['quantity'] ?? 0}')), // Quantity
+                                      Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text(
+                                              'UGX ${item['rate']?.toStringAsFixed(2) ?? '0.00'}')), // Rate
+                                      Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text(
+                                              'UGX ${item['amount']?.toStringAsFixed(2) ?? '0.00'}')), // Amount
+                                    ]);
+                                  }),
+                                ),
+                              ],
                             )
                           else
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                    'Item Name: ${invoiceData['itemName'] ?? 'N/A'}'),
-                                Text(
-                                    'Item Description: ${invoiceData['itemDescription'] ?? 'N/A'}'),
-                                Text(
-                                    'Item Quantity: ${invoiceData['itemQuantity'] ?? 'N/A'}'),
-                                Text(
-                                    'Item Market Price: ${invoiceData['itemMarketPrice'] ?? 'N/A'}'),
-                              ],
+                            const Text('No items available.'),
+
+                          const SizedBox(height: 10),
+
+                          // Grand Total
+                          Text(
+                            'Grand Total: UGX ${invoiceData['grandTotal']?.toStringAsFixed(2) ?? '0.00'}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
                             ),
-                          const SizedBox(height: 10),
-                          Text(
-                              'Other Expenses: ${invoiceData['otherExpenses'] ?? 'N/A'}'),
-                          Text(
-                              'Immediate Investment: ${invoiceData['immediateInvestment'] ?? 'N/A'}'),
-                          Text(
-                              'Days to Supply: ${invoiceData['daysToSupply'] ?? 'N/A'}'),
-                          Text(
-                              'Percentage Interest Charged: ${invoiceData['percentageInterestCharged'] ?? 'N/A'}'),
-                          Text('Rate: ${invoiceData['rate'] ?? 'N/A'}'),
-                          Text(
-                              'Total Investment: ${invoiceData['totalInvestment'] ?? 'N/A'}'),
-                          Text(
-                              'Total Profit: ${invoiceData['totalProfit'] ?? 'N/A'}'),
-                          const SizedBox(height: 10),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // Download Invoice Button
                           ElevatedButton(
                             onPressed: () async {
                               await downloadInvoice(invoice.id);
                             },
                             style: ElevatedButton.styleFrom(
-                              primary: Colors.blue,
+                              backgroundColor: Colors.blue,
+                              foregroundColor: Colors.white,
                             ),
                             child: const Text('Download Invoice'),
                           ),
