@@ -7,6 +7,7 @@ import 'invoicesscreen.dart';
 import 'reportsscreen.dart';
 import 'settingsscreen.dart';
 import 'loginscreen.dart'; // Ensure this is imported
+import 'summaryscreen.dart'; // Correctly use the Firestore-integrated SummaryScreen
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -147,10 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
               title: const Text('Logout'),
               onTap: () async {
                 try {
-                  // Sign out the user
                   await FirebaseAuth.instance.signOut();
-
-                  // Navigate to the login screen
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(builder: (context) => LoginScreen()),
@@ -183,84 +181,32 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 contentPadding: const EdgeInsets.symmetric(vertical: 10.0),
               ),
-              onSubmitted: (query) async {
-                if (query.trim().isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Please enter a search term.')),
-                  );
-                  return;
-                }
-
-                try {
-                  // Firestore query to search for the input in users, invoices, or items collections
-                  final userResults = await FirebaseFirestore.instance
-                      .collection('users')
-                      .where('name', isGreaterThanOrEqualTo: query)
-                      .where('name', isLessThanOrEqualTo: query + '\uf8ff')
-                      .get();
-
-                  final invoiceResults = await FirebaseFirestore.instance
-                      .collection('invoices')
-                      .where('invoiceId', isEqualTo: query)
-                      .get();
-
-                  final itemResults = await FirebaseFirestore.instance
-                      .collection('items')
-                      .where('itemName', isGreaterThanOrEqualTo: query)
-                      .where('itemName', isLessThanOrEqualTo: query + '\uf8ff')
-                      .get();
-
-                  // Aggregate and process results
-                  List<String> results = [];
-                  for (var doc in userResults.docs) {
-                    results.add('User: ${doc['name']}');
-                  }
-                  for (var doc in invoiceResults.docs) {
-                    results.add('Invoice ID: ${doc['invoiceId']}');
-                  }
-                  for (var doc in itemResults.docs) {
-                    results.add('Item: ${doc['itemName']}');
-                  }
-
-                  // Display results or show no matches found
-                  if (results.isNotEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content: Text('Results:\n${results.join('\n')}')),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('No matches found.')),
-                    );
-                  }
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                        content: Text('Error during search: ${e.toString()}')),
-                  );
-                }
-              },
             ),
           ),
           Expanded(
             child: Row(
               children: [
+                // Sidebar Menu
                 Container(
                   width: 250,
                   color: const Color.fromARGB(255, 231, 230, 230),
                   padding: const EdgeInsets.all(10),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 30),
-                      buildDashboardItem("Dashboard", Icons.dashboard, 0),
-                      buildDashboardItem("Categories", Icons.category, 1),
-                      buildDashboardItem("Invoices", Icons.receipt, 2),
-                      buildDashboardItem("Settings", Icons.settings, 3),
-                      buildDashboardItem("Reports", Icons.bar_chart, 4),
-                    ],
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 30),
+                        buildDashboardItem("Dashboard", Icons.dashboard, 0),
+                        buildDashboardItem("Categories", Icons.category, 1),
+                        buildDashboardItem("Invoices", Icons.receipt, 2),
+                        buildDashboardItem("Summary", Icons.summarize, 3),
+                        buildDashboardItem("Settings", Icons.settings, 4),
+                        buildDashboardItem("Reports", Icons.bar_chart, 5),
+                      ],
+                    ),
                   ),
                 ),
+
+                // Main Content
                 Expanded(
                   child: PageView(
                     controller: _pageController,
@@ -273,6 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       DashboardScreen(),
                       CategoriesScreen(),
                       InvoicesScreen(),
+                      SummaryScreen(), // Correct SummaryScreen
                       SettingsScreen(),
                       ReportsScreen(),
                     ],

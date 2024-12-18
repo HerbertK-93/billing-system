@@ -95,6 +95,14 @@ class _SupplyScreenState extends State<SupplyScreen> {
       'timestamp': FieldValue.serverTimestamp(),
     });
 
+    // Add entry to summary collection
+    await FirebaseFirestore.instance.collection('summary').add({
+      'clientName': clientNameController.text.trim(),
+      'sessionId': invoiceSessionId,
+      'grandTotal': grandTotal,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Invoice Saved Successfully!')),
     );
