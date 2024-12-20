@@ -106,6 +106,8 @@ class ViewInvoicesScreen extends StatelessWidget {
                               'Client Address: ${invoiceData['clientAddress'] ?? 'N/A'}'),
                           Text(
                               'Client Email: ${invoiceData['clientEmail'] ?? 'N/A'}'),
+                          Text(
+                              'Category: ${invoiceData['category'] ?? 'Uncategorized'}'),
                           Text('Date: ${invoiceData['date'] ?? 'N/A'}'),
                           const SizedBox(height: 10),
 
