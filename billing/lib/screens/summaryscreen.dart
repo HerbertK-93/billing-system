@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'dart:html' as html;
 
 class SummaryScreen extends StatefulWidget {
   @override
@@ -13,6 +14,21 @@ class _SummaryScreenState extends State<SummaryScreen> {
   String formatCurrency(double value) {
     final formatter = NumberFormat.currency(locale: 'en_UG', symbol: 'UGX');
     return formatter.format(value);
+  }
+
+  Future<void> downloadSummary(String summaryId) async {
+    final url =
+        'http://localhost:3000/downloadSummary/$summaryId'; // Backend endpoint
+    try {
+      html.AnchorElement anchor = html.AnchorElement(href: url)
+        ..target = '_blank'
+        ..download = 'summary_$summaryId.pdf'; // Suggested file name
+      anchor.click();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
   }
 
   @override
@@ -116,21 +132,19 @@ class _SummaryScreenState extends State<SummaryScreen> {
                                         Text(
                                             'Quantity: ${itemData['quantity'] ?? 0}'),
                                         Text(
+                                            'Days to Pay: ${itemData['daysToSupply'] ?? 0}'),
+                                        Text(
+                                            '% Interest Charged: ${itemData['interestPercentage']?.toDouble() ?? 0.0}%'),
+                                        Text(
                                             'Market Price: ${formatCurrency(itemData['marketPrice']?.toDouble() ?? 0.0)}'),
                                         Text(
                                             'Other Expenses: ${formatCurrency(itemData['otherExpenses']?.toDouble() ?? 0.0)}'),
                                         Text(
                                             'Immediate Investment: ${formatCurrency(itemData['immediateInvestment']?.toDouble() ?? 0.0)}'),
                                         Text(
-                                            'Days to Supply: ${itemData['daysToSupply'] ?? 0}'),
-                                        Text(
-                                            'Interest Charged: ${formatCurrency(itemData['interestCharged']?.toDouble() ?? 0.0)}'),
-                                        Text(
-                                            '% Interest: ${itemData['interestPercentage']?.toDouble() ?? 0.0}%'),
-                                        Text(
                                             'Total Investment: ${formatCurrency(itemData['totalInvestment']?.toDouble() ?? 0.0)}'),
                                         Text(
-                                            'Markup Percentage: ${itemData['markupPercentage']?.toDouble() ?? 0.0}%'),
+                                            '% Markup: ${itemData['markupPercentage']?.toDouble() ?? 0.0}%'),
                                         Text(
                                             'Profit: ${formatCurrency(itemData['profit']?.toDouble() ?? 0.0)}'),
                                         Text(
@@ -142,6 +156,15 @@ class _SummaryScreenState extends State<SummaryScreen> {
                                   ),
                                 );
                               }).toList(),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: ElevatedButton.icon(
+                                  onPressed: () =>
+                                      downloadSummary(summaries[index].id),
+                                  icon: const Icon(Icons.download),
+                                  label: const Text('Download Summary'),
+                                ),
+                              ),
                             ],
                           ),
                         ),
