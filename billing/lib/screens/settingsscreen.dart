@@ -9,13 +9,9 @@ class SettingsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Settings',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
+            const SizedBox(
+                height: 16), // This space is kept for layout adjustment
             // General Settings Section
-            const Divider(thickness: 1, color: Colors.grey),
             ExpansionTile(
               leading: const Icon(Icons.settings, color: Colors.black),
               title: const Text('General Settings'),

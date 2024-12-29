@@ -9,11 +9,9 @@ class ReportsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Detailed Reports',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
+            const SizedBox(
+                height:
+                    16), // This adds space where the "Detailed Reports" title was
             Expanded(
               child: ListView(
                 children: [

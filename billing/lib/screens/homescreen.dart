@@ -6,8 +6,8 @@ import 'dashboardscreen.dart';
 import 'invoicesscreen.dart';
 import 'reportsscreen.dart';
 import 'settingsscreen.dart';
-import 'loginscreen.dart'; // Ensure this is imported
-import 'summaryscreen.dart'; // Correctly use the Firestore-integrated SummaryScreen
+import 'loginscreen.dart';
+import 'summaryscreen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override

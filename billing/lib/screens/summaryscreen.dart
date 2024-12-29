@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:html' as html;
+import 'package:http/http.dart' as http;
 
 class SummaryScreen extends StatefulWidget {
   @override
@@ -17,16 +18,23 @@ class _SummaryScreenState extends State<SummaryScreen> {
   }
 
   Future<void> downloadSummary(String summaryId) async {
-    final url =
-        'http://localhost:3000/downloadSummary/$summaryId'; // Backend endpoint
+    final url = 'http://localhost:3000/downloadSummary/$summaryId';
+
     try {
-      html.AnchorElement anchor = html.AnchorElement(href: url)
-        ..target = '_blank'
-        ..download = 'summary_$summaryId.pdf'; // Suggested file name
-      anchor.click();
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final blob = html.Blob([response.bodyBytes]);
+        final anchor = html.AnchorElement(
+          href: html.Url.createObjectUrlFromBlob(blob),
+        )
+          ..download = 'summary_$summaryId.pdf'
+          ..click();
+      } else {
+        throw Exception('Failed to download summary: ${response.body}');
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
+        SnackBar(content: Text('Error downloading summary: $e')),
       );
     }
   }
@@ -158,11 +166,14 @@ class _SummaryScreenState extends State<SummaryScreen> {
                               }).toList(),
                               Align(
                                 alignment: Alignment.centerRight,
-                                child: ElevatedButton.icon(
+                                child: ElevatedButton(
                                   onPressed: () =>
                                       downloadSummary(summaries[index].id),
-                                  icon: const Icon(Icons.download),
-                                  label: const Text('Download Summary'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.blue,
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  child: const Text('Download Summary'),
                                 ),
                               ),
                             ],
