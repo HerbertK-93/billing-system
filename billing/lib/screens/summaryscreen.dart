@@ -131,7 +131,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          'Name: ${itemData['name'] ?? 'Unknown'}',
+                                          'Number: ${itemData['number'] ?? 'Unknown'}',
                                           style: const TextStyle(
                                               fontWeight: FontWeight.bold),
                                         ),

@@ -16,7 +16,7 @@ class _SupplyScreenState extends State<SupplyScreen> {
       TextEditingController();
 
   // Item controllers
-  final TextEditingController itemNameController = TextEditingController();
+  final TextEditingController itemNumberController = TextEditingController();
   final TextEditingController itemDescriptionController =
       TextEditingController();
   final TextEditingController itemQuantityController = TextEditingController();
@@ -80,23 +80,22 @@ class _SupplyScreenState extends State<SupplyScreen> {
     // Profit
     final double markupPercentage =
         double.tryParse(itemMarkupPercentageController.text.trim()) ?? 0.0;
-    final double profit = immediateInvestment * (markupPercentage / 100);
+    final double profit = totalInvestment * (markupPercentage / 100);
     itemProfitController.text = profit.toStringAsFixed(2);
 
     // Rate
-    final double rate = (immediateInvestment + profit) / quantity;
+    final double rate = (totalInvestment + profit) / quantity;
     itemRateController.text = rate.toStringAsFixed(2);
-
     // Amount
     final double amount = rate * quantity;
     itemAmountController.text = amount.toStringAsFixed(2);
   }
 
   void addItem() async {
-    if (itemNameController.text.isNotEmpty &&
+    if (itemNumberController.text.isNotEmpty &&
         itemQuantityController.text.isNotEmpty &&
         itemRateController.text.isNotEmpty) {
-      final String itemName = itemNameController.text.trim();
+      final String itemNumber = itemNumberController.text.trim();
       final String itemDescription = itemDescriptionController.text.trim();
       final int quantity =
           int.tryParse(itemQuantityController.text.trim()) ?? 0;
@@ -126,7 +125,7 @@ class _SupplyScreenState extends State<SupplyScreen> {
 
       setState(() {
         items.add({
-          'name': itemName,
+          'number': itemNumber,
           'description': itemDescription,
           'quantity': quantity,
           'marketPrice': marketPrice,
@@ -145,7 +144,7 @@ class _SupplyScreenState extends State<SupplyScreen> {
         grandTotal += amount;
 
         // Clear input fields
-        itemNameController.clear();
+        itemNumberController.clear();
         itemDescriptionController.clear();
         itemQuantityController.clear();
         itemMarketPriceController.clear();
@@ -175,7 +174,7 @@ class _SupplyScreenState extends State<SupplyScreen> {
             .update({
           'items': FieldValue.arrayUnion([
             {
-              'name': itemName,
+              'number': itemNumber,
               'description': itemDescription,
               'quantity': quantity,
               'marketPrice': marketPrice,
@@ -207,7 +206,7 @@ class _SupplyScreenState extends State<SupplyScreen> {
           'category': clientCategoryController.text.trim(),
           'items': [
             {
-              'name': itemName,
+              'number': itemNumber,
               'description': itemDescription,
               'quantity': quantity,
               'marketPrice': marketPrice,
@@ -325,7 +324,7 @@ class _SupplyScreenState extends State<SupplyScreen> {
             const SizedBox(height: 20),
             const Text('Add Item',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            buildInputField('Item Name', itemNameController),
+            buildInputField('Item Number', itemNumberController),
             buildInputField('Item Description', itemDescriptionController),
             buildInputField('Quantity', itemQuantityController,
                 isNumeric: true, onChanged: (_) => calculateValues()),
@@ -378,7 +377,7 @@ class _SupplyScreenState extends State<SupplyScreen> {
               },
               children: [
                 const TableRow(children: [
-                  Padding(padding: EdgeInsets.all(8.0), child: Text('Name')),
+                  Padding(padding: EdgeInsets.all(8.0), child: Text('Number')),
                   Padding(
                       padding: EdgeInsets.all(8.0), child: Text('Description')),
                   Padding(
@@ -392,7 +391,7 @@ class _SupplyScreenState extends State<SupplyScreen> {
                   return TableRow(children: [
                     Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text(item['name'])),
+                        child: Text(item['number'])),
                     Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text(item['description'])),
@@ -449,6 +448,37 @@ class _SupplyScreenState extends State<SupplyScreen> {
       {bool isNumeric = false,
       bool readOnly = false,
       void Function(String)? onChanged}) {
+    if (label == 'Date') {
+      // Special handling for Date input field
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: TextField(
+          controller: controller,
+          readOnly: true, // Prevent manual input
+          onTap: () async {
+            // Show calendar picker
+            final DateTime? pickedDate = await showDatePicker(
+              context: context,
+              initialDate: DateTime.now(),
+              firstDate: DateTime(2000),
+              lastDate: DateTime(2100),
+            );
+            if (pickedDate != null) {
+              // Format and set the selected date
+              controller.text = "${pickedDate.toLocal()}".split(' ')[0];
+            }
+          },
+          decoration: InputDecoration(
+            labelText: label,
+            border:
+                OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+            filled: true,
+            fillColor: Colors.grey[200], // Optional: Indicate read-only status
+          ),
+        ),
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextField(

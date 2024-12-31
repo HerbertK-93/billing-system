@@ -127,7 +127,7 @@ class ViewInvoicesScreen extends StatelessWidget {
                             Table(
                               border: TableBorder.all(color: Colors.grey),
                               columnWidths: const {
-                                0: FlexColumnWidth(2), // Name
+                                0: FlexColumnWidth(2), // Number
                                 1: FlexColumnWidth(3), // Description
                                 2: FlexColumnWidth(1), // Quantity
                                 3: FlexColumnWidth(1), // Rate
@@ -138,7 +138,7 @@ class ViewInvoicesScreen extends StatelessWidget {
                                 const TableRow(children: [
                                   Padding(
                                     padding: EdgeInsets.all(8.0),
-                                    child: Text('Name',
+                                    child: Text('Number',
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold)),
                                   ),
@@ -173,8 +173,8 @@ class ViewInvoicesScreen extends StatelessWidget {
                                     return TableRow(children: [
                                       Padding(
                                           padding: const EdgeInsets.all(8.0),
-                                          child: Text(
-                                              item['name'] ?? 'N/A')), // Name
+                                          child: Text(item['number'] ??
+                                              'N/A')), // Number
                                       Padding(
                                           padding: const EdgeInsets.all(8.0),
                                           child: Text(item['description'] ??
