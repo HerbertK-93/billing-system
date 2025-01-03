@@ -101,7 +101,6 @@ class ViewInvoicesScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Display Client Information
                           Text(
                               'Client Address: ${invoiceData['clientAddress'] ?? 'N/A'}'),
                           Text(
@@ -110,8 +109,6 @@ class ViewInvoicesScreen extends StatelessWidget {
                               'Category: ${invoiceData['category'] ?? 'Uncategorized'}'),
                           Text('Date: ${invoiceData['date'] ?? 'N/A'}'),
                           const SizedBox(height: 10),
-
-                          // Display Items Section
                           const Text(
                             'Items:',
                             style: TextStyle(
@@ -121,20 +118,18 @@ class ViewInvoicesScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 10),
-
                           if (invoiceData['items'] != null &&
                               invoiceData['items'] is List)
                             Table(
                               border: TableBorder.all(color: Colors.grey),
                               columnWidths: const {
-                                0: FlexColumnWidth(2), // Number
-                                1: FlexColumnWidth(3), // Description
-                                2: FlexColumnWidth(1), // Quantity
-                                3: FlexColumnWidth(1), // Rate
-                                4: FlexColumnWidth(2), // Amount
+                                0: FlexColumnWidth(2),
+                                1: FlexColumnWidth(3),
+                                2: FlexColumnWidth(1),
+                                3: FlexColumnWidth(1),
+                                4: FlexColumnWidth(2),
                               },
                               children: [
-                                // Table Header
                                 const TableRow(children: [
                                   Padding(
                                     padding: EdgeInsets.all(8.0),
@@ -167,7 +162,6 @@ class ViewInvoicesScreen extends StatelessWidget {
                                             fontWeight: FontWeight.bold)),
                                   ),
                                 ]),
-                                // Table Rows
                                 ...List<TableRow>.from(
                                   (invoiceData['items'] as List).map((item) {
                                     return TableRow(children: [
@@ -186,33 +180,46 @@ class ViewInvoicesScreen extends StatelessWidget {
                                       Padding(
                                           padding: const EdgeInsets.all(8.0),
                                           child: Text(
-                                              'UGX ${item['rate']?.toStringAsFixed(2) ?? '0.00'}')), // Rate
+                                              '${item['rate']?.toStringAsFixed(2) ?? '0.00'}')), // Rate without UGX
                                       Padding(
                                           padding: const EdgeInsets.all(8.0),
                                           child: Text(
-                                              'UGX ${item['amount']?.toStringAsFixed(2) ?? '0.00'}')), // Amount
+                                              '${item['amount']?.toStringAsFixed(2) ?? '0.00'}')), // Amount without UGX
                                     ]);
                                   }),
                                 ),
+                                TableRow(children: [
+                                  const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Text(
+                                      'Total Amount',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                  const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Text('')),
+                                  const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Text('')),
+                                  const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Text('')),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      '${invoiceData['totalAmount']?.toStringAsFixed(2) ?? '0.00'}',
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ]),
                               ],
                             )
                           else
                             const Text('No items available.'),
-
-                          const SizedBox(height: 10),
-
-                          // Grand Total
-                          Text(
-                            'Grand Total: UGX ${invoiceData['grandTotal']?.toStringAsFixed(2) ?? '0.00'}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-
                           const SizedBox(height: 20),
-
-                          // Download Invoice Button
                           ElevatedButton(
                             onPressed: () async {
                               await downloadInvoice(invoice.id);

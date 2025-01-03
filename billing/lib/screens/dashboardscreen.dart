@@ -103,7 +103,6 @@ class DashboardScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
 
-                // StreamBuilder to fetch and display recent activities
                 StreamBuilder<QuerySnapshot>(
                   stream: FirebaseFirestore.instance
                       .collection('recentActivities')
@@ -163,7 +162,7 @@ class DashboardScreen extends StatelessWidget {
                               ),
                             ),
                             subtitle: Text(
-                              "Invoice ID: ${data['invoiceId'] ?? 'N/A'}",
+                              "Invoice ID: ${data['invoiceId'] ?? 'N/A'}", // Displays stored Invoice ID
                             ),
                             trailing: Text(
                               formatTimestamp(data['timestamp']),
@@ -175,7 +174,7 @@ class DashboardScreen extends StatelessWidget {
                       }).toList(),
                     );
                   },
-                ),
+                )
               ],
             ),
           ),

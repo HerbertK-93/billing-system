@@ -60,6 +60,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
               itemBuilder: (context, index) {
                 final summary = summaries[index].data() as Map<String, dynamic>;
 
+                final invoiceId = summary['invoiceId'] ?? 'Unknown';
                 final clientName = summary['clientName'] ?? 'Unknown';
                 final clientAddress = summary['clientAddress'] ?? 'Unknown';
                 final clientEmail = summary['clientEmail'] ?? 'Unknown';
@@ -76,11 +77,11 @@ class _SummaryScreenState extends State<SummaryScreen> {
                     children: [
                       ListTile(
                         title: Text(
-                          clientName,
+                          'Invoice ID: $invoiceId',
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         subtitle: Text(
-                          'Category: $category\nDate: $date',
+                          'Client: $clientName\nCategory: $category\nDate: $date',
                           style:
                               const TextStyle(fontSize: 14, color: Colors.grey),
                         ),

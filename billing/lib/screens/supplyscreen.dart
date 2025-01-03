@@ -44,7 +44,9 @@ class _SupplyScreenState extends State<SupplyScreen> {
 
   String invoiceSessionId = '';
   List<Map<String, dynamic>> items = [];
-  double grandTotal = 0.0;
+  double totalAmount = 0.0;
+
+  String invoiceId = '';
 
   void calculateValues() {
     final int quantity = int.tryParse(itemQuantityController.text.trim()) ?? 0;
@@ -53,8 +55,14 @@ class _SupplyScreenState extends State<SupplyScreen> {
     final double otherExpenses =
         double.tryParse(itemOtherExpensesController.text.trim()) ?? 0.0;
 
+    // Helper function to round to the nearest 100
+    double roundToNearest100(double value) {
+      return (value / 100).round() * 100;
+    }
+
     // Immediate Investment
-    final double immediateInvestment = quantity * marketPrice + otherExpenses;
+    final double immediateInvestment =
+        roundToNearest100(quantity * marketPrice + otherExpenses);
     itemImmediateInvestmentController.text =
         immediateInvestment.toStringAsFixed(2);
 
@@ -67,27 +75,33 @@ class _SupplyScreenState extends State<SupplyScreen> {
         double.tryParse(itemInterestPercentageController.text.trim()) ?? 0.0;
 
     // % Interest Charged
-    final double interestCharged = immediateInvestment *
-        (daysToSupply + (monthsToPay * 30)) /
-        30 *
-        (interestPercentage / 100);
+    final double interestCharged = roundToNearest100(
+      immediateInvestment *
+          (daysToSupply + (monthsToPay * 30)) /
+          30 *
+          (interestPercentage / 100),
+    );
     itemInterestChargedController.text = interestCharged.toStringAsFixed(2);
 
     // Total Investment
-    final double totalInvestment = immediateInvestment + interestCharged;
+    final double totalInvestment =
+        roundToNearest100(immediateInvestment + interestCharged);
     itemTotalInvestmentController.text = totalInvestment.toStringAsFixed(2);
 
     // Profit
     final double markupPercentage =
         double.tryParse(itemMarkupPercentageController.text.trim()) ?? 0.0;
-    final double profit = totalInvestment * (markupPercentage / 100);
+    final double profit =
+        roundToNearest100(totalInvestment * (markupPercentage / 100));
     itemProfitController.text = profit.toStringAsFixed(2);
 
     // Rate
-    final double rate = (totalInvestment + profit) / quantity;
+    final double rate =
+        roundToNearest100((totalInvestment + profit) / quantity);
     itemRateController.text = rate.toStringAsFixed(2);
+
     // Amount
-    final double amount = rate * quantity;
+    final double amount = roundToNearest100(rate * quantity);
     itemAmountController.text = amount.toStringAsFixed(2);
   }
 
@@ -141,7 +155,7 @@ class _SupplyScreenState extends State<SupplyScreen> {
           'rate': rate,
           'amount': amount,
         });
-        grandTotal += amount;
+        totalAmount += amount;
 
         // Clear input fields
         itemNumberController.clear();
@@ -161,7 +175,6 @@ class _SupplyScreenState extends State<SupplyScreen> {
         itemAmountController.clear();
       });
 
-      // Update the summary collection
       final existingDoc = await FirebaseFirestore.instance
           .collection('summary')
           .doc(invoiceSessionId)
@@ -191,7 +204,7 @@ class _SupplyScreenState extends State<SupplyScreen> {
               'amount': amount,
             }
           ]),
-          'grandTotal': FieldValue.increment(amount),
+          'totalAmount': FieldValue.increment(amount),
         });
       } else {
         await FirebaseFirestore.instance
@@ -223,7 +236,7 @@ class _SupplyScreenState extends State<SupplyScreen> {
               'amount': amount,
             }
           ],
-          'grandTotal': amount,
+          'totalAmount': amount,
           'createdAt': FieldValue.serverTimestamp(),
         });
       }
@@ -238,8 +251,35 @@ class _SupplyScreenState extends State<SupplyScreen> {
     }
   }
 
+  Future<void> createNewInvoiceSession() async {
+    try {
+      final docRef =
+          FirebaseFirestore.instance.collection('counters').doc('invoice');
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        final snapshot = await transaction.get(docRef);
+        if (!snapshot.exists) {
+          transaction.set(docRef, {'current': 1});
+          invoiceId = '001';
+        } else {
+          int current = snapshot['current'];
+          current += 1;
+          transaction.update(docRef, {'current': current});
+          invoiceId = current.toString().padLeft(3, '0');
+        }
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('New Invoice Session Created: $invoiceId')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error creating invoice session: $e')),
+      );
+    }
+  }
+
   void saveInvoice() async {
-    if (invoiceSessionId.isEmpty) {
+    if (invoiceId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Create a new invoice session first.')),
       );
@@ -247,38 +287,50 @@ class _SupplyScreenState extends State<SupplyScreen> {
     }
 
     final Map<String, dynamic> invoiceData = {
-      'sessionId': invoiceSessionId,
+      'invoiceId': invoiceId,
       'clientName': clientNameController.text.trim(),
       'clientAddress': clientAddressController.text.trim(),
       'clientEmail': clientEmailController.text.trim(),
       'category': clientCategoryController.text.trim(),
       'date': dateController.text.trim(),
       'items': items,
-      'grandTotal': grandTotal,
+      'totalAmount': totalAmount,
       'createdAt': FieldValue.serverTimestamp(),
     };
 
     // Save to the invoices collection
     await FirebaseFirestore.instance
         .collection('invoices')
-        .doc(invoiceSessionId)
+        .doc(invoiceId)
         .set(invoiceData);
 
-    // Add a single entry to recentActivities
-    await FirebaseFirestore.instance.collection('recentActivities').add({
+    // Save to the summary collection
+    await FirebaseFirestore.instance.collection('summary').doc(invoiceId).set({
+      'invoiceId': invoiceId,
       'clientName': clientNameController.text.trim(),
-      'invoiceId': invoiceSessionId,
+      'clientAddress': clientAddressController.text.trim(),
+      'clientEmail': clientEmailController.text.trim(),
+      'category': clientCategoryController.text.trim(),
+      'date': dateController.text.trim(),
+      'items': items,
+      'totalAmount': totalAmount,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+
+    await FirebaseFirestore.instance.collection('recentActivities').add({
+      'invoiceId': invoiceId,
+      'clientName': clientNameController.text.trim(),
       'timestamp': FieldValue.serverTimestamp(),
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Invoice Saved Successfully!')),
+      const SnackBar(content: Text('Invoice and Summary Saved Successfully!')),
     );
 
     setState(() {
       items.clear();
-      grandTotal = 0.0;
-      invoiceSessionId = '';
+      totalAmount = 0.0;
+      invoiceId = '';
     });
   }
 
@@ -290,17 +342,7 @@ class _SupplyScreenState extends State<SupplyScreen> {
         backgroundColor: Colors.grey[300],
         actions: [
           ElevatedButton.icon(
-            onPressed: () {
-              setState(() {
-                invoiceSessionId =
-                    DateTime.now().millisecondsSinceEpoch.toString();
-              });
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content:
-                        Text('New Invoice Session Created: $invoiceSessionId')),
-              );
-            },
+            onPressed: createNewInvoiceSession,
             icon: const Icon(Icons.add),
             label: const Text('Create New Invoice'),
             style: ElevatedButton.styleFrom(
@@ -382,7 +424,8 @@ class _SupplyScreenState extends State<SupplyScreen> {
                       padding: EdgeInsets.all(8.0), child: Text('Description')),
                   Padding(
                       padding: EdgeInsets.all(8.0), child: Text('Quantity')),
-                  Padding(padding: EdgeInsets.all(8.0), child: Text('Rate')),
+                  Padding(
+                      padding: EdgeInsets.all(8.0), child: Text('Rate (UGX)')),
                   Padding(
                       padding: EdgeInsets.all(8.0),
                       child: Text('Amount (UGX)')),
@@ -390,29 +433,48 @@ class _SupplyScreenState extends State<SupplyScreen> {
                 ...items.map((item) {
                   return TableRow(children: [
                     Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(item['number'])),
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(item['number']),
+                    ),
                     Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(item['description'])),
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(item['description']),
+                    ),
                     Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text('${item['quantity']}')),
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text('${item['quantity']}'),
+                    ),
                     Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text('UGX ${item['rate'].toStringAsFixed(2)}')),
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text('${item['rate'].toStringAsFixed(2)}'),
+                    ),
                     Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child:
-                            Text('UGX ${item['amount'].toStringAsFixed(2)}')),
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text('${item['amount'].toStringAsFixed(2)}'),
+                    ),
                   ]);
                 }).toList(),
+                TableRow(children: [
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text(
+                      'Total Amount',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+                  const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+                  const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      totalAmount.toStringAsFixed(2),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ]),
               ],
             ),
-            const SizedBox(height: 20),
-            Text('Grand Total: UGX ${grandTotal.toStringAsFixed(2)}',
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -428,7 +490,7 @@ class _SupplyScreenState extends State<SupplyScreen> {
                 ElevatedButton.icon(
                   onPressed: () => setState(() {
                     items.clear();
-                    grandTotal = 0.0;
+                    totalAmount = 0.0;
                   }),
                   icon: const Icon(Icons.clear),
                   label: const Text('Clear All'),
