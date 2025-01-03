@@ -66,7 +66,41 @@ class _SummaryScreenState extends State<SummaryScreen> {
                 final clientEmail = summary['clientEmail'] ?? 'Unknown';
                 final date = summary['date'] ?? 'Unknown';
                 final category = summary['category'] ?? 'Unknown';
-                final items = summary['items'] as List<dynamic>? ?? [];
+
+                // Ensure items are fetched and parsed correctly
+                final items =
+                    (summary['items'] as List<dynamic>? ?? []).map((item) {
+                  final itemData = item as Map<String, dynamic>;
+                  return {
+                    'number': itemData['number'] ?? 'Unknown',
+                    'description': itemData['description'] ?? 'Unknown',
+                    'qualificationOfWorkers':
+                        itemData['qualificationOfWorkers'] ?? 0,
+                    'quantity': itemData['quantity'] ?? 0,
+                    'numberOfWorkers': itemData['numberOfWorkers'] ?? 0,
+                    'numberOfDays': itemData['numberOfDays'] ?? 0,
+                    'hoursInDay': itemData['hoursInDay'] ?? 0,
+                    'moneyPaidPerHourPerPerson':
+                        itemData['moneyPaidPerHourPerPerson'] ?? 0,
+                    'daysToSupply': itemData['daysToSupply'] ?? 0,
+                    'interestPercentage':
+                        itemData['interestPercentage']?.toDouble() ?? 0.0,
+                    'marketPrice': itemData['marketPrice']?.toDouble() ?? 0.0,
+                    'otherExpenses':
+                        itemData['otherExpenses']?.toDouble() ?? 0.0,
+                    'machiningCost': itemData['machiningCost']?.toDouble() ??
+                        0.0, // Ensure machiningCost is mapped
+                    'immediateInvestment':
+                        itemData['immediateInvestment']?.toDouble() ?? 0.0,
+                    'totalInvestment':
+                        itemData['totalInvestment']?.toDouble() ?? 0.0,
+                    'markupPercentage':
+                        itemData['markupPercentage']?.toDouble() ?? 0.0,
+                    'profit': itemData['profit']?.toDouble() ?? 0.0,
+                    'rate': itemData['rate']?.toDouble() ?? 0.0,
+                    'amount': itemData['amount']?.toDouble() ?? 0.0,
+                  };
+                }).toList();
 
                 final isExpanded = expandedItems[summaries[index].id] ?? false;
 
@@ -121,7 +155,6 @@ class _SummaryScreenState extends State<SummaryScreen> {
                                     fontSize: 16, fontWeight: FontWeight.bold),
                               ),
                               ...items.map((item) {
-                                final itemData = item as Map<String, dynamic>;
                                 return Card(
                                   margin:
                                       const EdgeInsets.symmetric(vertical: 8),
@@ -132,34 +165,45 @@ class _SummaryScreenState extends State<SummaryScreen> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          'Number: ${itemData['number'] ?? 'Unknown'}',
+                                          'Number: ${item['number']}',
                                           style: const TextStyle(
                                               fontWeight: FontWeight.bold),
                                         ),
                                         Text(
-                                            'Description: ${itemData['description'] ?? 'Unknown'}'),
+                                            'Description: ${item['description']}'),
+                                        Text('Quantity: ${item['quantity']}'),
                                         Text(
-                                            'Quantity: ${itemData['quantity'] ?? 0}'),
+                                            'Qualification of Workers: ${item['qualificationOfWorkers']}'),
                                         Text(
-                                            'Days to Pay: ${itemData['daysToSupply'] ?? 0}'),
+                                            'Number of Workers: ${item['numberOfWorkers']}'),
                                         Text(
-                                            '% Interest Charged: ${itemData['interestPercentage']?.toDouble() ?? 0.0}%'),
+                                            'Number of Days: ${item['numberOfDays']}'),
                                         Text(
-                                            'Market Price: ${formatCurrency(itemData['marketPrice']?.toDouble() ?? 0.0)}'),
+                                            'Hours in Day: ${item['hoursInDay']}'),
                                         Text(
-                                            'Other Expenses: ${formatCurrency(itemData['otherExpenses']?.toDouble() ?? 0.0)}'),
+                                            'Money Paid Per Hour Per Person: ${item['moneyPaidPerHourPerPerson']}'),
                                         Text(
-                                            'Immediate Investment: ${formatCurrency(itemData['immediateInvestment']?.toDouble() ?? 0.0)}'),
+                                            'Days to Pay: ${item['daysToSupply']}'),
                                         Text(
-                                            'Total Investment: ${formatCurrency(itemData['totalInvestment']?.toDouble() ?? 0.0)}'),
+                                            '% Interest Charged: ${item['interestPercentage']}%'),
                                         Text(
-                                            '% Markup: ${itemData['markupPercentage']?.toDouble() ?? 0.0}%'),
+                                            'Market Price: ${formatCurrency(item['marketPrice'])}'),
                                         Text(
-                                            'Profit: ${formatCurrency(itemData['profit']?.toDouble() ?? 0.0)}'),
+                                            'Other Expenses: ${formatCurrency(item['otherExpenses'])}'),
                                         Text(
-                                            'Rate: ${formatCurrency(itemData['rate']?.toDouble() ?? 0.0)}'),
+                                            'Machining Cost: ${formatCurrency(item['machiningCost'])}'), // Display machiningCost
                                         Text(
-                                            'Amount: ${formatCurrency(itemData['amount']?.toDouble() ?? 0.0)}'),
+                                            'Immediate Investment: ${formatCurrency(item['immediateInvestment'])}'),
+                                        Text(
+                                            'Total Investment: ${formatCurrency(item['totalInvestment'])}'),
+                                        Text(
+                                            '% Markup: ${item['markupPercentage']}%'),
+                                        Text(
+                                            'Profit: ${formatCurrency(item['profit'])}'),
+                                        Text(
+                                            'Rate: ${formatCurrency(item['rate'])}'),
+                                        Text(
+                                            'Amount: ${formatCurrency(item['amount'])}'),
                                       ],
                                     ),
                                   ),
