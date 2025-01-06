@@ -67,6 +67,7 @@ class ViewInvoicesScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final invoice = invoices[index];
               final invoiceData = invoice.data() as Map<String, dynamic>;
+              final category = invoiceData['category'] ?? 'Uncategorized';
 
               return Card(
                 margin: const EdgeInsets.only(bottom: 16),
@@ -105,8 +106,7 @@ class ViewInvoicesScreen extends StatelessWidget {
                               'Client Address: ${invoiceData['clientAddress'] ?? 'N/A'}'),
                           Text(
                               'Client Email: ${invoiceData['clientEmail'] ?? 'N/A'}'),
-                          Text(
-                              'Category: ${invoiceData['category'] ?? 'Uncategorized'}'),
+                          Text('Category: $category'),
                           Text('Date: ${invoiceData['date'] ?? 'N/A'}'),
                           const SizedBox(height: 10),
                           const Text(
@@ -120,103 +120,7 @@ class ViewInvoicesScreen extends StatelessWidget {
                           const SizedBox(height: 10),
                           if (invoiceData['items'] != null &&
                               invoiceData['items'] is List)
-                            Table(
-                              border: TableBorder.all(color: Colors.grey),
-                              columnWidths: const {
-                                0: FlexColumnWidth(2),
-                                1: FlexColumnWidth(3),
-                                2: FlexColumnWidth(1),
-                                3: FlexColumnWidth(1),
-                                4: FlexColumnWidth(2),
-                              },
-                              children: [
-                                const TableRow(children: [
-                                  Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Text('Number',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold)),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Text('Description',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold)),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Text('Quantity',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold)),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Text('Rate (UGX)',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold)),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Text('Amount (UGX)',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold)),
-                                  ),
-                                ]),
-                                ...List<TableRow>.from(
-                                  (invoiceData['items'] as List).map((item) {
-                                    return TableRow(children: [
-                                      Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Text(item['number'] ??
-                                              'N/A')), // Number
-                                      Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Text(item['description'] ??
-                                              'N/A')), // Description
-                                      Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Text(
-                                              '${item['quantity'] ?? 0}')), // Quantity
-                                      Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Text(
-                                              '${item['rate']?.toStringAsFixed(2) ?? '0.00'}')), // Rate without UGX
-                                      Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Text(
-                                              '${item['amount']?.toStringAsFixed(2) ?? '0.00'}')), // Amount without UGX
-                                    ]);
-                                  }),
-                                ),
-                                TableRow(children: [
-                                  const Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Text(
-                                      'Total Amount',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                  const Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Text('')),
-                                  const Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Text('')),
-                                  const Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Text('')),
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(
-                                      '${invoiceData['totalAmount']?.toStringAsFixed(2) ?? '0.00'}',
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                ]),
-                              ],
-                            )
+                            buildInvoiceTable(category, invoiceData['items'])
                           else
                             const Text('No items available.'),
                           const SizedBox(height: 20),
@@ -240,6 +144,311 @@ class ViewInvoicesScreen extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+
+  /// Build a dynamic table based on the category
+  Widget buildInvoiceTable(String category, List<dynamic> items) {
+    List<TableRow> rows = [];
+
+    if (category == 'General') {
+      // General category table
+      rows.add(
+        const TableRow(children: [
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child:
+                Text('Number', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text('Description',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child:
+                Text('Quantity', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text('Rate (UGX)',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text('Amount (UGX)',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ]),
+      );
+
+      rows.addAll(items.map((item) {
+        return TableRow(children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(item['number'] ?? 'N/A'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(item['description'] ?? 'N/A'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text('${item['quantity'] ?? 0}'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text('${item['rate']?.toStringAsFixed(2) ?? '0.00'}'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text('${item['amount']?.toStringAsFixed(2) ?? '0.00'}'),
+          ),
+        ]);
+      }).toList());
+
+      // Add Summary Rows for Consumables, Labour, SubTotal2, VAT, etc.
+      final double consumables = items.fold<double>(
+        0.0,
+        (sum, item) => sum + (item['consumables'] ?? 0.0),
+      );
+      final double labour = items.fold<double>(
+        0.0,
+        (sum, item) => sum + (item['labour'] ?? 0.0),
+      );
+      final double subTotal2 = items.fold<double>(
+        0.0,
+        (sum, item) => sum + (item['subTotal2'] ?? 0.0),
+      );
+      final double vat = items.fold<double>(
+        0.0,
+        (sum, item) => sum + (item['vat'] ?? 0.0),
+      );
+      final double grandTotal = items.fold<double>(
+        0.0,
+        (sum, item) => sum + (item['grandTotal'] ?? 0.0),
+      );
+
+      rows.add(
+        TableRow(children: [
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text('Consumables',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(consumables.toStringAsFixed(2)),
+          ),
+        ]),
+      );
+
+      rows.add(
+        TableRow(children: [
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child:
+                Text('Labour', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(labour.toStringAsFixed(2)),
+          ),
+        ]),
+      );
+
+      rows.add(
+        TableRow(children: [
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text('Sub-Total 2',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(subTotal2.toStringAsFixed(2)),
+          ),
+        ]),
+      );
+
+      rows.add(
+        TableRow(children: [
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text('VAT', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(vat.toStringAsFixed(2)),
+          ),
+        ]),
+      );
+
+      rows.add(
+        TableRow(children: [
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text('Grand Total',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(grandTotal.toStringAsFixed(2)),
+          ),
+        ]),
+      );
+    } else if (category == 'Supply' || category == 'Machining') {
+      rows.add(
+        const TableRow(children: [
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child:
+                Text('Number', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text('Description',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child:
+                Text('Quantity', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text('Rate (UGX)',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text('Amount (UGX)',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ]),
+      );
+
+      rows.addAll(items.map((item) {
+        return TableRow(children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(item['number'] ?? 'N/A'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(item['description'] ?? 'N/A'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text('${item['quantity'] ?? 0}'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text('${item['rate']?.toStringAsFixed(2) ?? '0.00'}'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text('${item['amount']?.toStringAsFixed(2) ?? '0.00'}'),
+          ),
+        ]);
+      }).toList());
+    } else if (category == 'Maintenance' ||
+        category == 'Fabrication' ||
+        category == 'Installation' ||
+        category == 'Designing') {
+      rows.add(
+        const TableRow(children: [
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child:
+                Text('Number', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text('Description',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text('No of Workers',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text('No of Days',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text('Hours in Day',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text('Rate (UGX)',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text('Amount (UGX)',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ]),
+      );
+
+      rows.addAll(items.map((item) {
+        return TableRow(children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(item['number'] ?? 'N/A'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(item['description'] ?? 'N/A'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text('${item['numberOfWorkers'] ?? 0}'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text('${item['numberOfDays'] ?? 0}'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text('${item['hoursInDay'] ?? 0}'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text('${item['rate']?.toStringAsFixed(2) ?? '0.00'}'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text('${item['amount']?.toStringAsFixed(2) ?? '0.00'}'),
+          ),
+        ]);
+      }).toList());
+    }
+
+    return Table(
+      border: TableBorder.all(color: Colors.grey),
+      children: rows,
     );
   }
 }

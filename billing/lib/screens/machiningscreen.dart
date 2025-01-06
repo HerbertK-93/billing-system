@@ -66,7 +66,7 @@ class _MachiningScreenState extends State<MachiningScreen> {
 
     // Immediate Investment
     final double immediateInvestment = roundToNearest100(
-        quantity * marketPrice + otherExpenses + machiningCost);
+        quantity * (marketPrice + machiningCost) + otherExpenses);
     itemImmediateInvestmentController.text =
         immediateInvestment.toStringAsFixed(2);
 
@@ -388,7 +388,7 @@ class _MachiningScreenState extends State<MachiningScreen> {
             buildInputField(
                 'Immediate Investment', itemImmediateInvestmentController,
                 isNumeric: true, readOnly: true),
-            buildInputField('Days to Supply', itemDaysToSupplyController,
+            buildInputField('Days to Machine', itemDaysToSupplyController,
                 isNumeric: true, onChanged: (_) => calculateValues()),
             buildInputField('Months to Pay', itemMonthsToPayController,
                 isNumeric: true, onChanged: (_) => calculateValues()),

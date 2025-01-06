@@ -27,12 +27,9 @@ class _DesigningScreenState extends State<DesigningScreen> {
   final TextEditingController hoursInDayController = TextEditingController();
   final TextEditingController moneyPaidPerHourPerPersonController =
       TextEditingController();
-  final TextEditingController itemQuantityController = TextEditingController();
   final TextEditingController itemOtherExpensesController =
       TextEditingController();
   final TextEditingController itemImmediateInvestmentController =
-      TextEditingController();
-  final TextEditingController itemDaysToSupplyController =
       TextEditingController();
   final TextEditingController itemMonthsToPayController =
       TextEditingController();
@@ -56,9 +53,6 @@ class _DesigningScreenState extends State<DesigningScreen> {
 
   void calculateValues() {
     // Parse inputs safely
-    final int quantity = int.tryParse(itemQuantityController.text.trim()) ?? 0;
-    final double otherExpenses =
-        double.tryParse(itemOtherExpensesController.text.trim()) ?? 0.0;
     final int numberOfWorkers =
         int.tryParse(numberOfWorkersController.text.trim()) ?? 0;
     final int numberOfDays =
@@ -67,6 +61,8 @@ class _DesigningScreenState extends State<DesigningScreen> {
         double.tryParse(hoursInDayController.text.trim()) ?? 0.0;
     final double moneyPaidPerHour =
         double.tryParse(moneyPaidPerHourPerPersonController.text.trim()) ?? 0.0;
+    final double otherExpenses =
+        double.tryParse(itemOtherExpensesController.text.trim()) ?? 0.0;
 
     // Helper function to round to the nearest 100
     double roundToNearest100(double value) {
@@ -74,29 +70,23 @@ class _DesigningScreenState extends State<DesigningScreen> {
     }
 
     // Correct Immediate Investment Calculation
-    final double laborCost =
-        numberOfWorkers * numberOfDays * hoursInDay * moneyPaidPerHour;
-    final double immediateInvestment = (laborCost * quantity) + otherExpenses;
-
-    // Round the result and update the controller
+    final double totalWorkingHours =
+        numberOfWorkers * numberOfDays * hoursInDay;
+    final double immediateInvestment = roundToNearest100(
+        (totalWorkingHours * moneyPaidPerHour) + otherExpenses);
     itemImmediateInvestmentController.text =
-        roundToNearest100(immediateInvestment).toStringAsFixed(2);
+        immediateInvestment.toStringAsFixed(2);
 
-    // Days to Supply and Months to Pay
-    final int daysToSupply =
-        int.tryParse(itemDaysToSupplyController.text.trim()) ?? 0;
+    // Parse additional inputs
     final int monthsToPay =
         int.tryParse(itemMonthsToPayController.text.trim()) ?? 0;
     final double interestPercentage =
         double.tryParse(itemInterestPercentageController.text.trim()) ?? 0.0;
 
-    // % Interest Charged
-    final double interestCharged = roundToNearest100(
-      immediateInvestment *
-          (daysToSupply + (monthsToPay * 30)) /
-          30 *
-          (interestPercentage / 100),
-    );
+    // Interest Charged
+    final double interestCharged = roundToNearest100(immediateInvestment *
+        ((monthsToPay * 30) / 30) *
+        (interestPercentage / 100));
     itemInterestChargedController.text = interestCharged.toStringAsFixed(2);
 
     // Total Investment
@@ -113,22 +103,19 @@ class _DesigningScreenState extends State<DesigningScreen> {
 
     // Rate
     final double rate =
-        roundToNearest100((totalInvestment + profit) / quantity);
+        roundToNearest100((totalInvestment + profit) / totalWorkingHours);
     itemRateController.text = rate.toStringAsFixed(2);
 
     // Amount
-    final double amount = roundToNearest100(rate * quantity);
+    final double amount = roundToNearest100(rate * totalWorkingHours);
     itemAmountController.text = amount.toStringAsFixed(2);
   }
 
   void addItem() async {
     if (itemNumberController.text.isNotEmpty &&
-        itemQuantityController.text.isNotEmpty &&
         itemRateController.text.isNotEmpty) {
       final String itemNumber = itemNumberController.text.trim();
       final String itemDescription = itemDescriptionController.text.trim();
-      final int quantity =
-          int.tryParse(itemQuantityController.text.trim()) ?? 0;
       final String qualificationOfWorkers =
           qualificationOfWorkersController.text.trim();
       final int numberOfWorkers =
@@ -144,8 +131,6 @@ class _DesigningScreenState extends State<DesigningScreen> {
           double.tryParse(itemOtherExpensesController.text.trim()) ?? 0.0;
       final double immediateInvestment =
           double.tryParse(itemImmediateInvestmentController.text.trim()) ?? 0.0;
-      final int daysToSupply =
-          int.tryParse(itemDaysToSupplyController.text.trim()) ?? 0;
       final int monthsToPay =
           int.tryParse(itemMonthsToPayController.text.trim()) ?? 0;
       final double interestPercentage =
@@ -160,13 +145,12 @@ class _DesigningScreenState extends State<DesigningScreen> {
           double.tryParse(itemProfitController.text.trim()) ?? 0.0;
       final double rate =
           double.tryParse(itemRateController.text.trim()) ?? 0.0;
-      final double amount = quantity * rate;
+      final double amount = hoursInDay * rate;
 
       setState(() {
         items.add({
           'number': itemNumber,
           'description': itemDescription,
-          'quantity': quantity,
           'qualificationOfWorkers': qualificationOfWorkers,
           'numberOfWorkers': numberOfWorkers,
           'numberOfDays': numberOfDays,
@@ -174,7 +158,6 @@ class _DesigningScreenState extends State<DesigningScreen> {
           'moneyPaidPerHourPerPerson': moneyPaidPerHourPerPerson,
           'otherExpenses': otherExpenses,
           'immediateInvestment': immediateInvestment,
-          'daysToSupply': daysToSupply,
           'monthsToPay': monthsToPay,
           'interestPercentage': interestPercentage,
           'interestCharged': interestCharged,
@@ -189,7 +172,6 @@ class _DesigningScreenState extends State<DesigningScreen> {
         // Clear input fields
         itemNumberController.clear();
         itemDescriptionController.clear();
-        itemQuantityController.clear();
         qualificationOfWorkersController.clear();
         numberOfWorkersController.clear();
         numberOfDaysController.clear();
@@ -197,7 +179,6 @@ class _DesigningScreenState extends State<DesigningScreen> {
         moneyPaidPerHourPerPersonController.clear();
         itemOtherExpensesController.clear();
         itemImmediateInvestmentController.clear();
-        itemDaysToSupplyController.clear();
         itemMonthsToPayController.clear();
         itemInterestPercentageController.clear();
         itemInterestChargedController.clear();
@@ -222,7 +203,6 @@ class _DesigningScreenState extends State<DesigningScreen> {
             {
               'number': itemNumber,
               'description': itemDescription,
-              'quantity': quantity,
               'qualificationOfWorkers': qualificationOfWorkers,
               'numberOfWorkers': numberOfWorkers,
               'numberOfDays': numberOfDays,
@@ -230,7 +210,6 @@ class _DesigningScreenState extends State<DesigningScreen> {
               'moneyPaidPerHourPerPerson': moneyPaidPerHourPerPerson,
               'otherExpenses': otherExpenses,
               'immediateInvestment': immediateInvestment,
-              'daysToSupply': daysToSupply,
               'monthsToPay': monthsToPay,
               'interestPercentage': interestPercentage,
               'interestCharged': interestCharged,
@@ -258,7 +237,6 @@ class _DesigningScreenState extends State<DesigningScreen> {
             {
               'number': itemNumber,
               'description': itemDescription,
-              'quantity': quantity,
               'qualificationOfWorkers': qualificationOfWorkers,
               'numberOfWorkers': numberOfWorkers,
               'numberOfDays': numberOfDays,
@@ -266,7 +244,6 @@ class _DesigningScreenState extends State<DesigningScreen> {
               'moneyPaidPerHourPerPerson': moneyPaidPerHourPerPerson,
               'otherExpenses': otherExpenses,
               'immediateInvestment': immediateInvestment,
-              'daysToSupply': daysToSupply,
               'monthsToPay': monthsToPay,
               'interestPercentage': interestPercentage,
               'interestCharged': interestCharged,
@@ -409,15 +386,13 @@ class _DesigningScreenState extends State<DesigningScreen> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             buildInputField('Item Number', itemNumberController),
             buildInputField('Item Description', itemDescriptionController),
-            buildInputField('Quantity', itemQuantityController,
-                isNumeric: true, onChanged: (_) => calculateValues()),
             buildInputField(
                 'Qualification of Workers', qualificationOfWorkersController),
             buildInputField('Number of Workers', numberOfWorkersController,
                 isNumeric: true),
             buildInputField('Number of Days', numberOfDaysController,
                 isNumeric: true),
-            buildInputField('Hours in a Day', hoursInDayController,
+            buildInputField('Hours in Day', hoursInDayController,
                 isNumeric: true),
             buildInputField('Money Paid per Hour Per Person',
                 moneyPaidPerHourPerPersonController,
@@ -427,8 +402,6 @@ class _DesigningScreenState extends State<DesigningScreen> {
             buildInputField(
                 'Immediate Investment', itemImmediateInvestmentController,
                 isNumeric: true, readOnly: true),
-            buildInputField('Days to Supply', itemDaysToSupplyController,
-                isNumeric: true, onChanged: (_) => calculateValues()),
             buildInputField('Months to Pay', itemMonthsToPayController,
                 isNumeric: true, onChanged: (_) => calculateValues()),
             buildInputField(
@@ -461,11 +434,13 @@ class _DesigningScreenState extends State<DesigningScreen> {
             Table(
               border: TableBorder.all(color: Colors.grey),
               columnWidths: const {
-                0: FlexColumnWidth(2),
+                0: FlexColumnWidth(1),
                 1: FlexColumnWidth(2),
                 2: FlexColumnWidth(1),
                 3: FlexColumnWidth(1),
-                4: FlexColumnWidth(2),
+                4: FlexColumnWidth(1),
+                5: FlexColumnWidth(1),
+                6: FlexColumnWidth(1),
               },
               children: [
                 const TableRow(children: [
@@ -473,7 +448,14 @@ class _DesigningScreenState extends State<DesigningScreen> {
                   Padding(
                       padding: EdgeInsets.all(8.0), child: Text('Description')),
                   Padding(
-                      padding: EdgeInsets.all(8.0), child: Text('Quantity')),
+                      padding: EdgeInsets.all(8.0),
+                      child: Text('Number of workers')),
+                  Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text('Number of days')),
+                  Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text('Hours in day')),
                   Padding(
                       padding: EdgeInsets.all(8.0), child: Text('Rate (UGX)')),
                   Padding(
@@ -492,7 +474,15 @@ class _DesigningScreenState extends State<DesigningScreen> {
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text('${item['quantity']}'),
+                      child: Text('${item['numberOfWorkers']}'),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text('${item['numberOfDays']}'),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text('${item['hoursInDay']}'),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -512,6 +502,8 @@ class _DesigningScreenState extends State<DesigningScreen> {
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
+                  const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+                  const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
                   const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
                   const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
                   const Padding(padding: EdgeInsets.all(8.0), child: Text('')),

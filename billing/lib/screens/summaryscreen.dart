@@ -75,21 +75,22 @@ class _SummaryScreenState extends State<SummaryScreen> {
                     'number': itemData['number'] ?? 'Unknown',
                     'description': itemData['description'] ?? 'Unknown',
                     'qualificationOfWorkers':
-                        itemData['qualificationOfWorkers'] ?? 0,
+                        itemData['qualificationOfWorkers'] ?? 'Unknown',
                     'quantity': itemData['quantity'] ?? 0,
                     'numberOfWorkers': itemData['numberOfWorkers'] ?? 0,
                     'numberOfDays': itemData['numberOfDays'] ?? 0,
                     'hoursInDay': itemData['hoursInDay'] ?? 0,
                     'moneyPaidPerHourPerPerson':
-                        itemData['moneyPaidPerHourPerPerson'] ?? 0,
+                        itemData['moneyPaidPerHourPerPerson']?.toDouble() ??
+                            0.0,
                     'daysToSupply': itemData['daysToSupply'] ?? 0,
                     'interestPercentage':
                         itemData['interestPercentage']?.toDouble() ?? 0.0,
                     'marketPrice': itemData['marketPrice']?.toDouble() ?? 0.0,
                     'otherExpenses':
                         itemData['otherExpenses']?.toDouble() ?? 0.0,
-                    'machiningCost': itemData['machiningCost']?.toDouble() ??
-                        0.0, // Ensure machiningCost is mapped
+                    'machiningCost':
+                        itemData['machiningCost']?.toDouble() ?? 0.0,
                     'immediateInvestment':
                         itemData['immediateInvestment']?.toDouble() ?? 0.0,
                     'totalInvestment':
@@ -99,6 +100,16 @@ class _SummaryScreenState extends State<SummaryScreen> {
                     'profit': itemData['profit']?.toDouble() ?? 0.0,
                     'rate': itemData['rate']?.toDouble() ?? 0.0,
                     'amount': itemData['amount']?.toDouble() ?? 0.0,
+                    'Sub-Total 1': itemData['subTotal1']?.toDouble() ?? 0.0,
+                    'Consumables Percentage':
+                        itemData['consumablesPercentage']?.toDouble() ?? 0.0,
+                    'Consumables': itemData['consumables']?.toDouble() ?? 0.0,
+                    'Labour Percentage':
+                        itemData['labourPercentage']?.toDouble() ?? 0.0,
+                    'Labour': itemData['labour']?.toDouble() ?? 0.0,
+                    'Sub-Total 2': itemData['subTotal2']?.toDouble() ?? 0.0,
+                    'VAT': itemData['vat']?.toDouble() ?? 0.0,
+                    'Grand Total': itemData['grandTotal']?.toDouble() ?? 0.0,
                   };
                 }).toList();
 
@@ -181,7 +192,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
                                         Text(
                                             'Hours in Day: ${item['hoursInDay']}'),
                                         Text(
-                                            'Money Paid Per Hour Per Person: ${item['moneyPaidPerHourPerPerson']}'),
+                                            'Money Paid Per Hour Per Person: ${formatCurrency(item['moneyPaidPerHourPerPerson'])}'),
                                         Text(
                                             'Days to Pay: ${item['daysToSupply']}'),
                                         Text(
@@ -191,7 +202,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
                                         Text(
                                             'Other Expenses: ${formatCurrency(item['otherExpenses'])}'),
                                         Text(
-                                            'Machining Cost: ${formatCurrency(item['machiningCost'])}'), // Display machiningCost
+                                            'Machining Cost: ${formatCurrency(item['machiningCost'])}'),
                                         Text(
                                             'Immediate Investment: ${formatCurrency(item['immediateInvestment'])}'),
                                         Text(
@@ -204,6 +215,22 @@ class _SummaryScreenState extends State<SummaryScreen> {
                                             'Rate: ${formatCurrency(item['rate'])}'),
                                         Text(
                                             'Amount: ${formatCurrency(item['amount'])}'),
+                                        Text(
+                                            'Sub-Total 1: ${formatCurrency(item['Sub-Total 1'] ?? 0.0)}'),
+                                        Text(
+                                            'Consumables Percentage: ${item['Consumables Percentage'] ?? 0.0}%'),
+                                        Text(
+                                            'Consumables: ${formatCurrency(item['Consumables'] ?? 0.0)}'),
+                                        Text(
+                                            'Labour Percentage: ${item['Labour Percentage'] ?? 0.0}%'),
+                                        Text(
+                                            'Labour: ${formatCurrency(item['Labour'] ?? 0.0)}'),
+                                        Text(
+                                            'Sub-Total 2: ${formatCurrency(item['Sub-Total 2'] ?? 0.0)}'),
+                                        Text(
+                                            'VAT: ${formatCurrency(item['VAT'] ?? 0.0)}'),
+                                        Text(
+                                            'Grand Total: ${formatCurrency(item['Grand Total'] ?? 0.0)}'),
                                       ],
                                     ),
                                   ),
