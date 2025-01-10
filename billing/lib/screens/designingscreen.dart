@@ -103,8 +103,9 @@ class _DesigningScreenState extends State<DesigningScreen> {
         double.tryParse(itemInterestPercentageController.text.trim()) ?? 0.0;
 
     // Interest Charged Calculation
-    final double interestCharged = roundToNearest100(
-        immediateInvestment * (monthsToPay / 12) * (interestPercentage / 100));
+    final double interestCharged = roundToNearest100(immediateInvestment *
+        (numberOfDays + monthsToPay) *
+        (interestPercentage / 100));
     setState(() {
       itemInterestChargedController.text = interestCharged.toStringAsFixed(2);
     });
