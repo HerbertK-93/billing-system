@@ -25,6 +25,8 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
       TextEditingController();
   final TextEditingController numberOfDaysController = TextEditingController();
   final TextEditingController hoursInDayController = TextEditingController();
+  final TextEditingController totalWorkingHoursController =
+      TextEditingController();
   final TextEditingController moneyPaidPerHourPerPersonController =
       TextEditingController();
   final TextEditingController itemOtherExpensesController =
@@ -44,6 +46,11 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
   final TextEditingController itemProfitController = TextEditingController();
   final TextEditingController itemRateController = TextEditingController();
   final TextEditingController itemAmountController = TextEditingController();
+  final TextEditingController itemvatPercentageController =
+      TextEditingController();
+  final TextEditingController itemvatController = TextEditingController();
+  final TextEditingController itemgrandTotalController =
+      TextEditingController();
 
   String invoiceSessionId = '';
   List<Map<String, dynamic>> items = [];
@@ -59,23 +66,35 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
         int.tryParse(numberOfDaysController.text.trim()) ?? 0;
     final double hoursInDay =
         double.tryParse(hoursInDayController.text.trim()) ?? 0.0;
+
+    // Calculate total working hours
+    final double totalWorkingHours =
+        numberOfWorkers * numberOfDays * hoursInDay;
+
+    // Update Total Working Hours field
+    setState(() {
+      totalWorkingHoursController.text = totalWorkingHours.toStringAsFixed(2);
+    });
+
+    // Parse additional inputs
     final double moneyPaidPerHour =
         double.tryParse(moneyPaidPerHourPerPersonController.text.trim()) ?? 0.0;
     final double otherExpenses =
         double.tryParse(itemOtherExpensesController.text.trim()) ?? 0.0;
 
-    // Helper function to round to the nearest 100
+    // Rounding helper
     double roundToNearest100(double value) {
       return (value / 100).round() * 100;
     }
 
-    // Correct Immediate Investment Calculation
-    final double totalWorkingHours =
-        numberOfWorkers * numberOfDays * hoursInDay;
+    // Immediate Investment Calculation
     final double immediateInvestment = roundToNearest100(
         (totalWorkingHours * moneyPaidPerHour) + otherExpenses);
-    itemImmediateInvestmentController.text =
-        immediateInvestment.toStringAsFixed(2);
+
+    setState(() {
+      itemImmediateInvestmentController.text =
+          immediateInvestment.toStringAsFixed(2);
+    });
 
     // Parse additional inputs
     final int monthsToPay =
@@ -83,32 +102,52 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
     final double interestPercentage =
         double.tryParse(itemInterestPercentageController.text.trim()) ?? 0.0;
 
-    // Interest Charged
-    final double interestCharged = roundToNearest100(immediateInvestment *
-        ((monthsToPay * 30) / 30) *
-        (interestPercentage / 100));
-    itemInterestChargedController.text = interestCharged.toStringAsFixed(2);
+    // Interest Charged Calculation
+    final double interestCharged = roundToNearest100(
+        immediateInvestment * (monthsToPay / 12) * (interestPercentage / 100));
+    setState(() {
+      itemInterestChargedController.text = interestCharged.toStringAsFixed(2);
+    });
 
-    // Total Investment
+    // Total Investment Calculation
     final double totalInvestment =
         roundToNearest100(immediateInvestment + interestCharged);
-    itemTotalInvestmentController.text = totalInvestment.toStringAsFixed(2);
+    setState(() {
+      itemTotalInvestmentController.text = totalInvestment.toStringAsFixed(2);
+    });
 
-    // Profit
+    // Profit Calculation
     final double markupPercentage =
         double.tryParse(itemMarkupPercentageController.text.trim()) ?? 0.0;
     final double profit =
         roundToNearest100(totalInvestment * (markupPercentage / 100));
-    itemProfitController.text = profit.toStringAsFixed(2);
+    setState(() {
+      itemProfitController.text = profit.toStringAsFixed(2);
+    });
 
-    // Rate
-    final double rate =
-        roundToNearest100((totalInvestment + profit) / totalWorkingHours);
-    itemRateController.text = rate.toStringAsFixed(2);
+    // Rate Calculation
+    final double rate = totalWorkingHours > 0
+        ? roundToNearest100((totalInvestment + profit) / totalWorkingHours)
+        : 0.0;
+    setState(() {
+      itemRateController.text = rate.toStringAsFixed(2);
+    });
 
-    // Amount
+    // Amount Calculation (rate * totalWorkingHours)
     final double amount = roundToNearest100(rate * totalWorkingHours);
-    itemAmountController.text = amount.toStringAsFixed(2);
+    setState(() {
+      itemAmountController.text = amount.toStringAsFixed(2);
+
+      // VAT Calculation
+      final double vatPercentage =
+          double.tryParse(itemvatPercentageController.text.trim()) ?? 0.0;
+      final double vat = (amount * vatPercentage) / 100;
+      itemvatController.text = vat.toStringAsFixed(2);
+
+      // Grand Total Calculation
+      final double grandTotal = amount + vat;
+      itemgrandTotalController.text = grandTotal.toStringAsFixed(2);
+    });
   }
 
   void addItem() async {
@@ -124,6 +163,8 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
           int.tryParse(numberOfDaysController.text.trim()) ?? 0;
       final double hoursInDay =
           double.tryParse(hoursInDayController.text.trim()) ?? 0.0;
+      final double totalWorkingHours =
+          double.tryParse(totalWorkingHoursController.text.trim()) ?? 0.0;
       final double moneyPaidPerHourPerPerson =
           double.tryParse(moneyPaidPerHourPerPersonController.text.trim()) ??
               0.0;
@@ -145,7 +186,11 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
           double.tryParse(itemProfitController.text.trim()) ?? 0.0;
       final double rate =
           double.tryParse(itemRateController.text.trim()) ?? 0.0;
-      final double amount = hoursInDay * rate;
+      final double amount = rate * totalWorkingHours;
+      final double vatPercentage =
+          double.tryParse(itemvatPercentageController.text.trim()) ?? 0.0;
+      final double vat = (amount * vatPercentage) / 100;
+      final double grandTotal = amount + vat;
 
       setState(() {
         items.add({
@@ -155,6 +200,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
           'numberOfWorkers': numberOfWorkers,
           'numberOfDays': numberOfDays,
           'hoursInDay': hoursInDay,
+          'totalWorkingHours': totalWorkingHours,
           'moneyPaidPerHourPerPerson': moneyPaidPerHourPerPerson,
           'otherExpenses': otherExpenses,
           'immediateInvestment': immediateInvestment,
@@ -166,8 +212,9 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
           'profit': profit,
           'rate': rate,
           'amount': amount,
+          'vat': vat,
+          'grandTotal': grandTotal,
         });
-        totalAmount += amount;
 
         // Clear input fields
         itemNumberController.clear();
@@ -176,6 +223,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
         numberOfWorkersController.clear();
         numberOfDaysController.clear();
         hoursInDayController.clear();
+        totalWorkingHoursController.clear();
         moneyPaidPerHourPerPersonController.clear();
         itemOtherExpensesController.clear();
         itemImmediateInvestmentController.clear();
@@ -187,6 +235,9 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
         itemProfitController.clear();
         itemRateController.clear();
         itemAmountController.clear();
+        itemvatPercentageController.clear();
+        itemvatController.clear();
+        itemgrandTotalController.clear();
       });
 
       final existingDoc = await FirebaseFirestore.instance
@@ -207,6 +258,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
               'numberOfWorkers': numberOfWorkers,
               'numberOfDays': numberOfDays,
               'hoursInDay': hoursInDay,
+              'totalWorkingHours': totalWorkingHours,
               'moneyPaidPerHourPerPerson': moneyPaidPerHourPerPerson,
               'otherExpenses': otherExpenses,
               'immediateInvestment': immediateInvestment,
@@ -218,6 +270,8 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
               'profit': profit,
               'rate': rate,
               'amount': amount,
+              'vat': vat,
+              'grandTotal': grandTotal,
             }
           ]),
           'totalAmount': FieldValue.increment(amount),
@@ -241,6 +295,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
               'numberOfWorkers': numberOfWorkers,
               'numberOfDays': numberOfDays,
               'hoursInDay': hoursInDay,
+              'totalWorkingHours': totalWorkingHours,
               'moneyPaidPerHourPerPerson': moneyPaidPerHourPerPerson,
               'otherExpenses': otherExpenses,
               'immediateInvestment': immediateInvestment,
@@ -252,6 +307,8 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
               'profit': profit,
               'rate': rate,
               'amount': amount,
+              'vat': vat,
+              'grandTotal': grandTotal,
             }
           ],
           'totalAmount': amount,
@@ -387,37 +444,104 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
             buildInputField('Item Number', itemNumberController),
             buildInputField('Item Description', itemDescriptionController),
             buildInputField(
-                'Qualification of Workers', qualificationOfWorkersController),
-            buildInputField('Number of Workers', numberOfWorkersController,
-                isNumeric: true),
-            buildInputField('Number of Days', numberOfDaysController,
-                isNumeric: true),
-            buildInputField('Hours in Day', hoursInDayController,
-                isNumeric: true),
-            buildInputField('Money Paid per Hour Per Person',
-                moneyPaidPerHourPerPersonController,
-                isNumeric: true),
-            buildInputField('Other Expenses', itemOtherExpensesController,
-                isNumeric: true, onChanged: (_) => calculateValues()),
+              'Qualification of Workers',
+              qualificationOfWorkersController,
+            ),
             buildInputField(
-                'Immediate Investment', itemImmediateInvestmentController,
-                isNumeric: true, readOnly: true),
-            buildInputField('Months to Pay', itemMonthsToPayController,
-                isNumeric: true, onChanged: (_) => calculateValues()),
+              'Number of Workers',
+              numberOfWorkersController,
+              isNumeric: true,
+              onChanged: (_) => calculateValues(),
+            ),
             buildInputField(
-                '% Interest Charged', itemInterestPercentageController,
+              'Number of Days',
+              numberOfDaysController,
+              isNumeric: true,
+              onChanged: (_) => calculateValues(),
+            ),
+            buildInputField(
+              'Hours in Day',
+              hoursInDayController,
+              isNumeric: true,
+              onChanged: (_) => calculateValues(),
+            ),
+            buildInputField(
+              'Total Working Hours',
+              totalWorkingHoursController,
+              isNumeric: true,
+              readOnly: true,
+            ),
+            buildInputField(
+              'Money Paid per Hour Per Person',
+              moneyPaidPerHourPerPersonController,
+              isNumeric: true,
+              onChanged: (_) => calculateValues(),
+            ),
+            buildInputField(
+              'Other Expenses',
+              itemOtherExpensesController,
+              isNumeric: true,
+              onChanged: (_) => calculateValues(),
+            ),
+            buildInputField(
+              'Immediate Investment',
+              itemImmediateInvestmentController,
+              isNumeric: true,
+              readOnly: true,
+            ),
+            buildInputField(
+              'Months to Pay',
+              itemMonthsToPayController,
+              isNumeric: true,
+              onChanged: (_) => calculateValues(),
+            ),
+            buildInputField(
+              '% Interest Charged',
+              itemInterestPercentageController,
+              isNumeric: true,
+              onChanged: (_) => calculateValues(),
+            ),
+            buildInputField(
+              'Interest Charged',
+              itemInterestChargedController,
+              isNumeric: true,
+              readOnly: true,
+            ),
+            buildInputField(
+              'Total Investment',
+              itemTotalInvestmentController,
+              isNumeric: true,
+              readOnly: true,
+            ),
+            buildInputField(
+              '% Mark Up',
+              itemMarkupPercentageController,
+              isNumeric: true,
+              onChanged: (_) => calculateValues(),
+            ),
+            buildInputField(
+              'Profit',
+              itemProfitController,
+              isNumeric: true,
+              readOnly: true,
+            ),
+            buildInputField(
+              'Rate',
+              itemRateController,
+              isNumeric: true,
+              readOnly: true,
+            ),
+            buildInputField(
+              'Amount',
+              itemAmountController,
+              isNumeric: true,
+              readOnly: true,
+            ),
+            buildInputField('% VAT', itemvatPercentageController,
                 isNumeric: true, onChanged: (_) => calculateValues()),
-            buildInputField('Interest Charged', itemInterestChargedController,
+            buildInputField('VAT', itemvatController,
                 isNumeric: true, readOnly: true),
-            buildInputField('Total Investment', itemTotalInvestmentController,
-                isNumeric: true, readOnly: true),
-            buildInputField('% Mark Up', itemMarkupPercentageController,
-                isNumeric: true, onChanged: (_) => calculateValues()),
-            buildInputField('Profit', itemProfitController,
-                isNumeric: true, readOnly: true),
-            buildInputField('Rate', itemRateController,
-                isNumeric: true, readOnly: true),
-            buildInputField('Amount', itemAmountController,
+            buildInputField('Grand Total', itemgrandTotalController,
                 isNumeric: true, readOnly: true),
             ElevatedButton.icon(
               onPressed: addItem,
@@ -434,19 +558,24 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
             Table(
               border: TableBorder.all(color: Colors.grey),
               columnWidths: const {
-                0: FlexColumnWidth(1),
-                1: FlexColumnWidth(2),
+                0: FlexColumnWidth(0.5),
+                1: FlexColumnWidth(1),
                 2: FlexColumnWidth(1),
-                3: FlexColumnWidth(1),
-                4: FlexColumnWidth(1),
-                5: FlexColumnWidth(1),
+                3: FlexColumnWidth(0.8),
+                4: FlexColumnWidth(0.8),
+                5: FlexColumnWidth(0.8),
                 6: FlexColumnWidth(1),
+                7: FlexColumnWidth(1),
               },
               children: [
+                // Existing Headers
                 const TableRow(children: [
                   Padding(padding: EdgeInsets.all(8.0), child: Text('Number')),
                   Padding(
                       padding: EdgeInsets.all(8.0), child: Text('Description')),
+                  Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text('Qualification of Workers')),
                   Padding(
                       padding: EdgeInsets.all(8.0),
                       child: Text('Number of workers')),
@@ -462,6 +591,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
                       padding: EdgeInsets.all(8.0),
                       child: Text('Amount (UGX)')),
                 ]),
+                // Existing Item Rows
                 ...items.map((item) {
                   return TableRow(children: [
                     Padding(
@@ -471,6 +601,10 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Text(item['description']),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(item['qualificationOfWorkers']),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -494,13 +628,16 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
                     ),
                   ]);
                 }).toList(),
+                // VAT Row
                 TableRow(children: [
                   const Padding(
                     padding: EdgeInsets.all(8.0),
-                    child: Text(
-                      'Total Amount',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
+                    child: Text(''),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text('V.A.T (18%)',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
                   const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
                   const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
@@ -510,7 +647,43 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      totalAmount.toStringAsFixed(2),
+                      items.isNotEmpty
+                          ? (items
+                                      .map((e) => e['amount'])
+                                      .reduce((a, b) => a + b) *
+                                  0.18)
+                              .toStringAsFixed(2)
+                          : '0.00',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ]),
+                // Grand Total Row
+                TableRow(children: [
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text(''),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text('Grand Total',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                  const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+                  const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+                  const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+                  const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+                  const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      items.isNotEmpty
+                          ? (items
+                                      .map((e) => e['amount'])
+                                      .reduce((a, b) => a + b) *
+                                  1.18)
+                              .toStringAsFixed(2)
+                          : '0.00',
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),

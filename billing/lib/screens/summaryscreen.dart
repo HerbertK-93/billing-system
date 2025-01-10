@@ -80,6 +80,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
                     'numberOfWorkers': itemData['numberOfWorkers'] ?? 0,
                     'numberOfDays': itemData['numberOfDays'] ?? 0,
                     'hoursInDay': itemData['hoursInDay'] ?? 0,
+                    'totalWorkingHours': itemData['totalWorkingHours'] ?? 0,
                     'moneyPaidPerHourPerPerson':
                         itemData['moneyPaidPerHourPerPerson']?.toDouble() ??
                             0.0,
@@ -191,6 +192,8 @@ class _SummaryScreenState extends State<SummaryScreen> {
                                             'Number of Days: ${item['numberOfDays']}'),
                                         Text(
                                             'Hours in Day: ${item['hoursInDay']}'),
+                                        Text(
+                                            'Total Working Hours: ${item['totalWorkingHours']}'),
                                         Text(
                                             'Money Paid Per Hour Per Person: ${formatCurrency(item['moneyPaidPerHourPerPerson'])}'),
                                         Text(

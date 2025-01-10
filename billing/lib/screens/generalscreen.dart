@@ -354,12 +354,12 @@ class _GeneralScreenState extends State<GeneralScreen> {
                   ]);
                 }).toList(),
                 TableRow(children: [
+                  const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
                   const Padding(
                     padding: EdgeInsets.all(8.0),
                     child: Text('Consumables',
                         style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
-                  const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
                   const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
                   const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
                   Padding(
@@ -376,12 +376,12 @@ class _GeneralScreenState extends State<GeneralScreen> {
                   ),
                 ]),
                 TableRow(children: [
+                  const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
                   const Padding(
                     padding: EdgeInsets.all(8.0),
                     child: Text('Labour',
                         style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
-                  const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
                   const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
                   const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
                   Padding(
@@ -398,12 +398,12 @@ class _GeneralScreenState extends State<GeneralScreen> {
                   ),
                 ]),
                 TableRow(children: [
+                  const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
                   const Padding(
                     padding: EdgeInsets.all(8.0),
                     child: Text('Sub-Total 2',
                         style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
-                  const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
                   const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
                   const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
                   Padding(
@@ -420,12 +420,12 @@ class _GeneralScreenState extends State<GeneralScreen> {
                   ),
                 ]),
                 TableRow(children: [
+                  const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
                   const Padding(
                     padding: EdgeInsets.all(8.0),
                     child: Text('V.A.T (18%)',
                         style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
-                  const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
                   const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
                   const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
                   Padding(
@@ -442,12 +442,12 @@ class _GeneralScreenState extends State<GeneralScreen> {
                   ),
                 ]),
                 TableRow(children: [
+                  const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
                   const Padding(
                     padding: EdgeInsets.all(8.0),
                     child: Text('Grand Total',
                         style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
-                  const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
                   const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
                   const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
                   Padding(

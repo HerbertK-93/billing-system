@@ -43,6 +43,11 @@ class _MachiningScreenState extends State<MachiningScreen> {
   final TextEditingController itemProfitController = TextEditingController();
   final TextEditingController itemRateController = TextEditingController();
   final TextEditingController itemAmountController = TextEditingController();
+  final TextEditingController itemvatPercentageController =
+      TextEditingController();
+  final TextEditingController itemvatController = TextEditingController();
+  final TextEditingController itemgrandTotalController =
+      TextEditingController();
 
   String invoiceSessionId = '';
   List<Map<String, dynamic>> items = [];
@@ -107,6 +112,16 @@ class _MachiningScreenState extends State<MachiningScreen> {
     // Amount
     final double amount = roundToNearest100(rate * quantity);
     itemAmountController.text = amount.toStringAsFixed(2);
+
+    // VAT Calculation
+    final double vatPercentage =
+        double.tryParse(itemvatPercentageController.text.trim()) ?? 0.0;
+    final double vat = (amount * vatPercentage) / 100;
+    itemvatController.text = vat.toStringAsFixed(2);
+
+    // Grand Total Calculation
+    final double grandTotal = amount + vat;
+    itemgrandTotalController.text = grandTotal.toStringAsFixed(2);
   }
 
   void addItem() async {
@@ -142,6 +157,10 @@ class _MachiningScreenState extends State<MachiningScreen> {
       final double rate =
           double.tryParse(itemRateController.text.trim()) ?? 0.0;
       final double amount = quantity * rate;
+      final double vatPercentage =
+          double.tryParse(itemvatPercentageController.text.trim()) ?? 0.0;
+      final double vat = (amount * vatPercentage) / 100;
+      final double grandTotal = amount + vat;
 
       setState(() {
         items.add({
@@ -161,6 +180,8 @@ class _MachiningScreenState extends State<MachiningScreen> {
           'profit': profit,
           'rate': rate,
           'amount': amount,
+          'vat': vat,
+          'grandTotal': grandTotal,
         });
         totalAmount += amount;
 
@@ -181,6 +202,9 @@ class _MachiningScreenState extends State<MachiningScreen> {
         itemProfitController.clear();
         itemRateController.clear();
         itemAmountController.clear();
+        itemvatPercentageController.clear();
+        itemvatController.clear();
+        itemgrandTotalController.clear();
       });
 
       final existingDoc = await FirebaseFirestore.instance
@@ -210,6 +234,8 @@ class _MachiningScreenState extends State<MachiningScreen> {
               'profit': profit,
               'rate': rate,
               'amount': amount,
+              'vat': vat,
+              'grandTotal': grandTotal,
             }
           ]),
           'totalAmount': FieldValue.increment(amount),
@@ -243,6 +269,8 @@ class _MachiningScreenState extends State<MachiningScreen> {
               'profit': profit,
               'rate': rate,
               'amount': amount,
+              'vat': vat,
+              'grandTotal': grandTotal,
             }
           ],
           'totalAmount': amount,
@@ -407,6 +435,12 @@ class _MachiningScreenState extends State<MachiningScreen> {
                 isNumeric: true, readOnly: true),
             buildInputField('Amount', itemAmountController,
                 isNumeric: true, readOnly: true),
+            buildInputField('% VAT', itemvatPercentageController,
+                isNumeric: true, onChanged: (_) => calculateValues()),
+            buildInputField('VAT', itemvatController,
+                isNumeric: true, readOnly: true),
+            buildInputField('Grand Total', itemgrandTotalController,
+                isNumeric: true, readOnly: true),
             ElevatedButton.icon(
               onPressed: addItem,
               icon: const Icon(Icons.add_box),
@@ -468,18 +502,61 @@ class _MachiningScreenState extends State<MachiningScreen> {
                 TableRow(children: [
                   const Padding(
                     padding: EdgeInsets.all(8.0),
-                    child: Text(
-                      'Total Amount',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
+                    child: Text(''),
                   ),
-                  const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
-                  const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
-                  const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text('V.A.T (18%)',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text(''),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text(''),
+                  ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      totalAmount.toStringAsFixed(2),
+                      items.isNotEmpty
+                          ? items
+                              .map((e) => e['vat'])
+                              .reduce((a, b) => a + b)
+                              .toStringAsFixed(2)
+                          : '0.00',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ]),
+                TableRow(children: [
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text(''),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text('Grand Total',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text(''),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text(''),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      items.isNotEmpty
+                          ? items
+                              .map((e) => e['grandTotal'])
+                              .reduce((a, b) => a + b)
+                              .toStringAsFixed(2)
+                          : '0.00',
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),

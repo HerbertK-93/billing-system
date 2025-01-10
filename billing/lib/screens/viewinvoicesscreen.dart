@@ -232,12 +232,12 @@ class ViewInvoicesScreen extends StatelessWidget {
 
       rows.add(
         TableRow(children: [
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
           const Padding(
             padding: EdgeInsets.all(8.0),
             child: Text('Consumables',
                 style: TextStyle(fontWeight: FontWeight.bold)),
           ),
-          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
           const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
           const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
           Padding(
@@ -249,12 +249,12 @@ class ViewInvoicesScreen extends StatelessWidget {
 
       rows.add(
         TableRow(children: [
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
           const Padding(
             padding: EdgeInsets.all(8.0),
             child:
                 Text('Labour', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
-          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
           const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
           const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
           Padding(
@@ -266,12 +266,12 @@ class ViewInvoicesScreen extends StatelessWidget {
 
       rows.add(
         TableRow(children: [
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
           const Padding(
             padding: EdgeInsets.all(8.0),
             child: Text('Sub-Total 2',
                 style: TextStyle(fontWeight: FontWeight.bold)),
           ),
-          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
           const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
           const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
           Padding(
@@ -283,11 +283,12 @@ class ViewInvoicesScreen extends StatelessWidget {
 
       rows.add(
         TableRow(children: [
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
           const Padding(
             padding: EdgeInsets.all(8.0),
-            child: Text('VAT', style: TextStyle(fontWeight: FontWeight.bold)),
+            child:
+                Text('VAT(18%)', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
-          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
           const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
           const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
           Padding(
@@ -299,12 +300,12 @@ class ViewInvoicesScreen extends StatelessWidget {
 
       rows.add(
         TableRow(children: [
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
           const Padding(
             padding: EdgeInsets.all(8.0),
             child: Text('Grand Total',
                 style: TextStyle(fontWeight: FontWeight.bold)),
           ),
-          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
           const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
           const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
           Padding(
@@ -368,6 +369,66 @@ class ViewInvoicesScreen extends StatelessWidget {
           ),
         ]);
       }).toList());
+      final double vat = items.fold<double>(
+        0.0,
+        (sum, item) => sum + (item['vat'] ?? 0.0),
+      );
+      final double grandTotal = items.fold<double>(
+        0.0,
+        (sum, item) => sum + (item['grandTotal'] ?? 0.0),
+      );
+
+      rows.add(
+        TableRow(children: [
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(''),
+          ),
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text('VAT (18%)',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(''),
+          ),
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(''),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(vat.toStringAsFixed(2)),
+          ),
+        ]),
+      );
+
+      rows.add(
+        TableRow(children: [
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(''),
+          ),
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text('Grand Total',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(''),
+          ),
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(''),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(grandTotal.toStringAsFixed(2)),
+          ),
+        ]),
+      );
     } else if (category == 'Maintenance' ||
         category == 'Fabrication' ||
         category == 'Installation' ||
@@ -382,6 +443,11 @@ class ViewInvoicesScreen extends StatelessWidget {
           Padding(
             padding: EdgeInsets.all(8.0),
             child: Text('Description',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text('Qualification of Workers',
                 style: TextStyle(fontWeight: FontWeight.bold)),
           ),
           Padding(
@@ -424,6 +490,10 @@ class ViewInvoicesScreen extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
+            child: Text(item['qualificationOfWorkers'] ?? 'N/A'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
             child: Text('${item['numberOfWorkers'] ?? 0}'),
           ),
           Padding(
@@ -444,6 +514,64 @@ class ViewInvoicesScreen extends StatelessWidget {
           ),
         ]);
       }).toList());
+
+      // VAT Row
+      final double vat = items.fold<double>(
+        0.0,
+        (sum, item) => sum + (item['amount'] ?? 0.0) * 0.18,
+      );
+
+      rows.add(
+        TableRow(children: [
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(''),
+          ),
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text('VAT (18%)',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(vat.toStringAsFixed(2)),
+          ),
+        ]),
+      );
+
+      // Grand Total Row
+      final double grandTotal = items.fold<double>(
+        0.0,
+        (sum, item) => sum + (item['amount'] ?? 0.0) * 1.18,
+      );
+
+      rows.add(
+        TableRow(children: [
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(''),
+          ),
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text('Grand Total',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+          const Padding(padding: EdgeInsets.all(8.0), child: Text('')),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(grandTotal.toStringAsFixed(2)),
+          ),
+        ]),
+      );
     }
 
     return Table(
