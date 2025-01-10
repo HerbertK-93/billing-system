@@ -46,33 +46,38 @@ class _GeneralScreenState extends State<GeneralScreen> {
     final double rate = double.tryParse(itemRateController.text.trim()) ?? 0.0;
 
     // Amount (same as Sub-Total 1)
-    final double amount = quantity * rate;
+    final double amount = _roundToHundredth(quantity * rate);
     itemAmountController.text = amount.toStringAsFixed(2);
     itemSubTotal1Controller.text = amount.toStringAsFixed(2);
 
     // Consumables Calculation
     final double consumablesPercentage =
         double.tryParse(itemConsumablesPercentageController.text.trim()) ?? 0.0;
-    final double consumables = (amount * consumablesPercentage) / 100;
+    final double consumables =
+        _roundToHundredth((amount * consumablesPercentage) / 100);
     itemConsumablesController.text = consumables.toStringAsFixed(2);
 
     // Labour Calculation
     final double labourPercentage =
         double.tryParse(itemLabourPercentageController.text.trim()) ?? 0.0;
-    final double labour = (amount * labourPercentage) / 100;
+    final double labour = _roundToHundredth((amount * labourPercentage) / 100);
     itemLabourController.text = labour.toStringAsFixed(2);
 
     // Sub-Total 2 Calculation
-    final double subTotal2 = amount + consumables + labour;
+    final double subTotal2 = _roundToHundredth(amount + consumables + labour);
     itemSubTotal2Controller.text = subTotal2.toStringAsFixed(2);
 
     // VAT Calculation (18%)
-    final double vat = (subTotal2 * 18) / 100;
+    final double vat = _roundToHundredth((subTotal2 * 18) / 100);
     itemVATController.text = vat.toStringAsFixed(2);
 
     // Grand Total Calculation
-    final double grandTotal = subTotal2 + vat;
+    final double grandTotal = _roundToHundredth(subTotal2 + vat);
     itemGrandTotalController.text = grandTotal.toStringAsFixed(2);
+  }
+
+  double _roundToHundredth(double value) {
+    return (value * 100).roundToDouble() / 100;
   }
 
   void addItem() {
