@@ -57,7 +57,7 @@ class _GeneralScreenState extends State<GeneralScreen> {
         _roundToHundredth((amount * consumablesPercentage) / 100);
     itemConsumablesController.text = consumables.toStringAsFixed(2);
 
-    // Labour Calculation
+    // Labour Calculation (Ensure value is valid)
     final double labourPercentage =
         double.tryParse(itemLabourPercentageController.text.trim()) ?? 0.0;
     final double labour = _roundToHundredth((amount * labourPercentage) / 100);
