@@ -52,6 +52,9 @@ class _DesigningScreenState extends State<DesigningScreen> {
   final TextEditingController itemgrandTotalController =
       TextEditingController();
 
+  // Issued by controller
+  final TextEditingController issuedByController = TextEditingController();
+
   String invoiceSessionId = '';
   List<Map<String, dynamic>> items = [];
   double totalAmount = 0.0;
@@ -369,6 +372,7 @@ class _DesigningScreenState extends State<DesigningScreen> {
       'clientEmail': clientEmailController.text.trim(),
       'category': clientCategoryController.text.trim(),
       'date': dateController.text.trim(),
+      'issuedBy': issuedByController.text.trim(), // Add this line
       'items': items,
       'totalAmount': totalAmount,
       'createdAt': FieldValue.serverTimestamp(),
@@ -388,6 +392,7 @@ class _DesigningScreenState extends State<DesigningScreen> {
       'clientEmail': clientEmailController.text.trim(),
       'category': clientCategoryController.text.trim(),
       'date': dateController.text.trim(),
+      'issuedBy': issuedByController.text.trim(), // Add this line
       'items': items,
       'totalAmount': totalAmount,
       'createdAt': FieldValue.serverTimestamp(),
@@ -407,6 +412,7 @@ class _DesigningScreenState extends State<DesigningScreen> {
       items.clear();
       totalAmount = 0.0;
       invoiceId = '';
+      issuedByController.clear(); // Clear the issued by field
     });
   }
 
@@ -414,7 +420,7 @@ class _DesigningScreenState extends State<DesigningScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Designing', style: TextStyle(color: Colors.black)),
+        title: const Text('Maintenance', style: TextStyle(color: Colors.black)),
         backgroundColor: Colors.grey[300],
         actions: [
           ElevatedButton.icon(
@@ -691,6 +697,10 @@ class _DesigningScreenState extends State<DesigningScreen> {
                 ]),
               ],
             ),
+            const SizedBox(height: 20),
+            const Text('Issued by',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            buildInputField('Name of the issuer', issuedByController),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,

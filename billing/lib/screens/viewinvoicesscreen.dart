@@ -124,6 +124,16 @@ class ViewInvoicesScreen extends StatelessWidget {
                           else
                             const Text('No items available.'),
                           const SizedBox(height: 20),
+                          // Display "Issued by" field
+                          if (invoiceData['issuedBy'] != null)
+                            Text(
+                              'Issued by: ${invoiceData['issuedBy']}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          const SizedBox(height: 20),
                           ElevatedButton(
                             onPressed: () async {
                               await downloadInvoice(invoice.id);

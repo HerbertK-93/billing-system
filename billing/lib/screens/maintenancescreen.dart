@@ -52,6 +52,9 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
   final TextEditingController itemgrandTotalController =
       TextEditingController();
 
+  // Issued by controller
+  final TextEditingController issuedByController = TextEditingController();
+
   String invoiceSessionId = '';
   List<Map<String, dynamic>> items = [];
   double totalAmount = 0.0;
@@ -369,6 +372,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
       'clientEmail': clientEmailController.text.trim(),
       'category': clientCategoryController.text.trim(),
       'date': dateController.text.trim(),
+      'issuedBy': issuedByController.text.trim(), // Add this line
       'items': items,
       'totalAmount': totalAmount,
       'createdAt': FieldValue.serverTimestamp(),
@@ -388,6 +392,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
       'clientEmail': clientEmailController.text.trim(),
       'category': clientCategoryController.text.trim(),
       'date': dateController.text.trim(),
+      'issuedBy': issuedByController.text.trim(), // Add this line
       'items': items,
       'totalAmount': totalAmount,
       'createdAt': FieldValue.serverTimestamp(),
@@ -407,6 +412,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
       items.clear();
       totalAmount = 0.0;
       invoiceId = '';
+      issuedByController.clear(); // Clear the issued by field
     });
   }
 
@@ -691,6 +697,10 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
                 ]),
               ],
             ),
+            const SizedBox(height: 20),
+            const Text('Issued by',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            buildInputField('Name of the issuer', issuedByController),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
